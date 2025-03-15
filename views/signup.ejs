@@ -1,0 +1,479 @@
+<!-- views/signup.ejs -->
+<%- include('partials/header', { pageTitle: pageTitle, user: user }) %>
+
+  <!-- Add Leaflet CSS and JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <div class="signup-page">
+    <div class="signup-header">
+      <h1>BookSwap</h1>
+      <p class="subtitle">Connect, Share, and Discover Books in Your Community</p>
+    </div>
+
+    <div class="signup-container">
+      <form id="signupForm">
+        <div class="form-sections">
+          <div class="form-section personal-info">
+            <div class="section-header">
+              <h2>Create Your Account</h2>
+              <p>Join our community of book lovers</p>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" name="name" placeholder="Enter your name" required>
+              </div>
+              <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required>
+              </div>
+              <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Create a password" required>
+              </div>
+              <div class="form-group full-width">
+                <label>Phone Number</label>
+                <div class="phone-input-group">
+                  <select id="country_code" name="country_code" required>
+                    <option value="">Select Code</option>
+                  </select>
+                  <input type="tel" id="number" name="number" placeholder="Enter phone number" required>
+                </div>
+              </div>
+
+              <div class="form-group full-width">
+                <label for="city_search">City</label>
+                <div class="search-container">
+                  <input type="text" id="city_search" placeholder="Search for your city" required>
+                  <div id="city_suggestions" class="suggestions-list"></div>
+                </div>
+              </div>
+
+              <div class="address-fields" style="display: none;">
+                <div class="form-group">
+                  <label for="country">Country</label>
+                  <input type="text" id="country" name="country" readonly required>
+                </div>
+                <div class="form-group">
+                  <label for="city">City</label>
+                  <input type="text" id="city" name="city" readonly>
+                </div>
+                <div class="form-group full-width">
+                  <label for="street_search">Street Address</label>
+                  <div class="search-container">
+                    <input type="text" id="street_search" placeholder="Search for your street" required>
+                    <div id="street_suggestions" class="suggestions-list"></div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="street">Street</label>
+                  <input type="text" id="street" name="street" readonly>
+                </div>
+                <div class="form-group">
+                  <label for="postcode">Postcode</label>
+                  <input type="text" id="postcode" name="postcode" readonly>
+                </div>
+                <div id="map" class="map-container"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section book-preferences">
+            <div class="section-header">
+              <h2>Book Preferences</h2>
+              <p>Select categories that interest you</p>
+            </div>
+            <div id="interestedBooks" class="categories-container"></div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-submit">
+            <span>Join BookSwap</span>
+            <div class="button-loader" style="display: none;">
+              <i class="fas fa-spinner fa-spin"></i>
+            </div>
+            <i class="fas fa-arrow-right"></i>
+          </button>
+          <p class="auth-link">Already have an account? <a href="/login">Sign in</a></p>
+        </div>
+      </form>
+      <div id="signupError" class="error-message"></div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="emailCall" tabindex="-1" aria-labelledby="emailCallLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="emailCallLabel">Welcome to BookSwap!</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Please check your email to verify your account and start your reading journey.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .signup-page {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%);
+      padding: 2rem 4rem;
+    }
+
+    .signup-header {
+      text-align: left;
+      max-width: 1400px;
+      margin: 0 auto 3rem;
+      padding: 0 1rem;
+    }
+
+    .signup-header h1 {
+      font-size: 3rem;
+      color: #2c3e50;
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+    }
+
+    .signup-header .subtitle {
+      font-size: 1.25rem;
+      color: #666;
+      max-width: 600px;
+    }
+
+    .signup-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    .form-sections {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 600px;
+    }
+
+    .form-section {
+      padding: 2.5rem;
+    }
+
+    .personal-info {
+      border-right: 1px solid #e5e7eb;
+    }
+
+    .section-header {
+      margin-bottom: 2rem;
+    }
+
+    .section-header h2 {
+      font-size: 1.75rem;
+      color: #2c3e50;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+
+    .section-header p {
+      color: #666;
+      font-size: 1rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .phone-input-group {
+      display: flex;
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+
+    #country_code {
+      width: 180px;
+      padding: 0.75rem;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      background-color: #f8f9fa;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    .phone-input-group input {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #2c3e50;
+      font-weight: 500;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      background-color: #f8f9fa;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: #e6b53f;
+      box-shadow: 0 0 0 3px rgba(230, 181, 63, 0.1);
+      outline: none;
+      background-color: white;
+    }
+
+    .address-fields {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      margin-top: 1rem;
+      padding: 1.5rem;
+      background: #f8fafc;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      animation: slideDown 0.3s ease-out;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .form-group input[readonly] {
+      background-color: #f1f5f9;
+      cursor: not-allowed;
+    }
+
+    .search-container {
+      position: relative;
+      width: 100%;
+    }
+
+    .suggestions-list {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1000;
+      display: none;
+    }
+
+    .suggestion-item {
+      padding: 10px 15px;
+      cursor: pointer;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .suggestion-item:last-child {
+      border-bottom: none;
+    }
+
+    .suggestion-item:hover {
+      background-color: #f8fafc;
+    }
+
+    .map-container {
+      grid-column: 1 / -1;
+      height: 200px;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-top: 1rem;
+    }
+
+    #map {
+      width: 100%;
+      height: 100%;
+    }
+
+    .book-preferences {
+      background: #f8f9fa;
+    }
+
+    .categories-container {
+      height: calc(100% - 100px);
+      overflow-y: auto;
+      padding-right: 1rem;
+    }
+
+    .categories-container::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .categories-container::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 3px;
+    }
+
+    .categories-container::-webkit-scrollbar-thumb {
+      background: #e6b53f;
+      border-radius: 3px;
+    }
+
+    .form-actions {
+      padding: 2rem 2.5rem;
+      background: #f8f9fa;
+      border-top: 1px solid #e5e7eb;
+      border-radius: 0 0 16px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .btn-submit {
+      padding: 1rem 2rem;
+      background: #e6b53f;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .btn-submit:hover {
+      background: #d4a531;
+      transform: translateY(-1px);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    .auth-link {
+      color: #666;
+      font-size: 1rem;
+    }
+
+    .auth-link a {
+      color: #e6b53f;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .auth-link a:hover {
+      text-decoration: underline;
+    }
+
+    .error-message {
+      margin: 1rem 2.5rem;
+      background: #fee2e2;
+      border: 1px solid #fecaca;
+      color: #dc2626;
+      padding: 1rem;
+      border-radius: 8px;
+      display: none;
+    }
+
+    @media (max-width: 1024px) {
+      .signup-page {
+        padding: 2rem;
+      }
+
+      .form-sections {
+        grid-template-columns: 1fr;
+      }
+
+      .personal-info {
+        border-right: none;
+        border-bottom: 1px solid #e5e7eb;
+      }
+
+      .categories-container {
+        height: 400px;
+      }
+
+      .address-fields {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .signup-page {
+        padding: 1rem;
+      }
+
+      .signup-header h1 {
+        font-size: 2.5rem;
+      }
+
+      .form-section {
+        padding: 1.5rem;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-actions {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+      }
+
+      .btn-submit {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .phone-input-group {
+        flex-direction: column;
+      }
+
+      #country_code {
+        width: 100%;
+      }
+    }
+
+    .button-loader {
+      display: inline-block;
+      margin-left: 8px;
+    }
+
+    .btn-submit:disabled .fa-arrow-right {
+      display: none;
+    }
+  </style>
+
+  <script src="/js/signup.js"></script>
+
+  <%- include('partials/footer') %>

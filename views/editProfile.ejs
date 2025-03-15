@@ -1,0 +1,544 @@
+<!-- views/edit-profile.ejs -->
+<%- include('partials/header', { pageTitle: 'Edit Profile' , user: user }) %>
+
+    <!-- Add Leaflet CSS and JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <div class="profile-container">
+        <div class="profile-wrapper">
+            <div class="profile-header">
+                <h1>Edit Profile</h1>
+                <p>Update your Book Swap profile</p>
+            </div>
+
+            <div class="profile-content">
+                <div id="editProfileError" class="alert alert-danger" style="display: none;"></div>
+
+                <form id="editProfileForm">
+                    <div class="profile-grid">
+                        <div class="profile-image-section">
+                            <div class="profile-image-wrapper">
+                                <img id="profileImagePreview"
+                                    src="https://media-hosting.imagekit.io//0f593923344a43d6/cat.jpeg"
+                                    alt="Profile Cartoon Preview">
+                                <div class="profile-image-overlay">
+                                    <i class="fas fa-camera"></i>
+                                </div>
+                            </div>
+                            <p class="profile-image-caption">Cartoon by Book Swap</p>
+
+                            <div class="form-group">
+                                <label for="cartoonLogo" class="form-label">Select Cartoon Logo</label>
+                                <select class="form-control" id="cartoonLogo" name="cartoonLogo">
+                                    <option value="cat">Playful Whiskers (Cat)</option>
+                                    <option value="dog">Happy Paws (Dog)</option>
+                                    <option value="pug">Playable Pet (Pug)</option>
+                                    <option value="lion">Funny (Lion)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="profile-details">
+                            <div class="profile-section">
+                                <h2>Personal Details</h2>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="name" class="form-label">Name</label>
+                                        <input type="text" class="form-control" id="name" name="name" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="number" class="form-label">Phone Number</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">+49</span>
+                                            <input type="text" class="form-control" id="number" name="number" required>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="email" class="form-label">Email</label>
+                                        <input type="email" class="form-control" id="email" name="email" readonly>
+                                    </div>
+
+                                    <div class="form-group full-width">
+                                        <label for="city_search" class="form-label">City</label>
+                                        <div class="search-container">
+                                            <input type="text" class="form-control" id="city_search"
+                                                placeholder="Search for your city" required>
+                                            <div id="city_suggestions" class="suggestions-list"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="address-fields">
+                                        <div class="form-group">
+                                            <label for="country" class="form-label">Country</label>
+                                            <input type="text" class="form-control" id="country" name="country" readonly
+                                                required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="city" class="form-label">City</label>
+                                            <input type="text" class="form-control" id="city" name="city" readonly>
+                                        </div>
+                                        <div class="form-group full-width">
+                                            <label for="street_search" class="form-label">Street Address</label>
+                                            <div class="search-container">
+                                                <input type="text" class="form-control" id="street_search"
+                                                    placeholder="Search for your street" required>
+                                                <div id="street_suggestions" class="suggestions-list"></div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="street" class="form-label">Street</label>
+                                            <input type="text" class="form-control" id="street" name="street" readonly>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="postcode" class="form-label">Postcode</label>
+                                            <input type="text" class="form-control" id="postcode" name="postcode"
+                                                readonly>
+                                        </div>
+                                        <div id="map" class="map-container"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="profile-section">
+                                <h2>Reading Interests</h2>
+                                <div class="interests-wrapper">
+                                    <div id="interestedBooks">
+                                        <!-- Book categories will be dynamically populated here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profile-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <span>Save Changes</span>
+                            <i class="fas fa-save"></i>
+                        </button>
+                        <a href="/profile" class="btn btn-secondary">
+                            <span>Cancel</span>
+                            <i class="fas fa-times"></i>
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        :root {
+            --primary: #EED47E;
+            --secondary: #2C3E50;
+            --accent: #34495E;
+            --light: #F8F9FA;
+            --dark: #1A1A1A;
+            --white: #FFFFFF;
+            --text: #2C3E50;
+            --gradient: linear-gradient(135deg, #EED47E, #F4E5A3);
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-container {
+            min-height: 100vh;
+            padding: 4rem 2rem;
+            background: var(--light);
+        }
+
+        .profile-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .profile-header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--secondary);
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .profile-header p {
+            color: var(--accent);
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        .profile-content {
+            background: var(--white);
+            border-radius: 30px;
+            padding: 3rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 3rem;
+            margin-bottom: 2rem;
+        }
+
+        .profile-image-section {
+            text-align: center;
+        }
+
+        .profile-image-wrapper {
+            position: relative;
+            width: 250px;
+            height: 250px;
+            margin: 0 auto 1rem;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .profile-image-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .profile-image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .profile-image-overlay i {
+            color: var(--white);
+            font-size: 2rem;
+        }
+
+        .profile-image-wrapper:hover img {
+            transform: scale(1.05);
+        }
+
+        .profile-image-wrapper:hover .profile-image-overlay {
+            opacity: 1;
+        }
+
+        .profile-image-caption {
+            color: var(--accent);
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 1.5rem;
+        }
+
+        .profile-section {
+            margin-bottom: 2.5rem;
+        }
+
+        .profile-section h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--secondary);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .profile-section h2::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            color: var(--text);
+            background-color: var(--white);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(238, 212, 126, 0.2);
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+        }
+
+        .input-group-text {
+            padding: 0.75rem 1rem;
+            background: var(--light);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-right: none;
+            border-radius: 12px 0 0 12px;
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        .input-group .form-control {
+            border-radius: 0 12px 12px 0;
+        }
+
+        .interests-wrapper {
+            background: var(--light);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .interests-select {
+            height: 200px;
+            padding: 1rem;
+            background: var(--white);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+        }
+
+        .interests-select option {
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .interests-select option:checked {
+            background: var(--primary);
+            color: var(--secondary);
+        }
+
+        .profile-actions {
+            text-align: center;
+            margin-top: 2rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: var(--secondary);
+            box-shadow: 0 4px 15px rgba(238, 212, 126, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--light);
+            color: var(--accent);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 6px 20px rgba(238, 212, 126, 0.4);
+            background: var(--gradient);
+        }
+
+        .btn-secondary:hover {
+            background: var(--white);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn i {
+            transition: transform 0.3s ease;
+        }
+
+        .btn:hover i {
+            transform: translateX(5px);
+        }
+
+        .alert-danger {
+            background-color: #fff5f5;
+            border: 1px solid #feb2b2;
+            color: #c53030;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 991px) {
+            .profile-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .profile-image-wrapper {
+                width: 200px;
+                height: 200px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .profile-container {
+                padding: 2rem 1rem;
+            }
+
+            .profile-content {
+                padding: 2rem;
+            }
+
+            .profile-header h1 {
+                font-size: 2rem;
+            }
+
+            .profile-header p {
+                font-size: 1rem;
+            }
+
+            .profile-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        .search-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .suggestions-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid var(--light);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+
+        .suggestion-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--light);
+        }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .suggestion-item:hover {
+            background-color: var(--light);
+        }
+
+        .address-fields {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-top: 1rem;
+            padding: 1.5rem;
+            background: var(--light);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .map-container {
+            grid-column: 1 / -1;
+            height: 200px;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        .form-control[readonly] {
+            background-color: var(--light);
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 991px) {
+            .address-fields {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+    <script src="/js/editProfile.js"></script>
+    <script src="/js/bookCategories.js"></script>
+    <%- include('partials/footer') %>

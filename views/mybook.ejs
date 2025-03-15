@@ -1,0 +1,277 @@
+<!-- views/myBook.ejs -->
+<%- include('partials/header', { pageTitle: 'My Books' , user: user }) %>
+
+  <div class="books-container">
+    <div class="books-wrapper">
+      <div class="books-header">
+        <h1>My Books</h1>
+        <p>Manage your book collection</p>
+      </div>
+
+      <div class="books-content">
+        <div id="myBookError" class="alert alert-danger" style="display: none;"></div>
+
+        <div class="books-grid" id="myBookContainer">
+          <!-- Books will be dynamically populated here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Book Button -->
+  <a href="/add-book" class="add-book-btn">
+    <i class="fas fa-plus"></i>
+    <span>Add New Book</span>
+  </a>
+
+  <style>
+    :root {
+      --primary: #EED47E;
+      --secondary: #2C3E50;
+      --accent: #34495E;
+      --light: #F8F9FA;
+      --dark: #1A1A1A;
+      --white: #FFFFFF;
+      --text: #2C3E50;
+      --gradient: linear-gradient(135deg, #EED47E, #F4E5A3);
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .books-container {
+      min-height: 100vh;
+      padding: 4rem 2rem;
+      background: var(--light);
+    }
+
+    .books-wrapper {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .books-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .books-header h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--secondary);
+      margin-bottom: 0.5rem;
+      background: linear-gradient(45deg, var(--secondary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .books-header p {
+      color: var(--accent);
+      font-size: 1.1rem;
+      opacity: 0.8;
+    }
+
+    .books-content {
+      background: var(--white);
+      border-radius: 30px;
+      padding: 3rem;
+      box-shadow: var(--card-shadow);
+    }
+
+    .books-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 2rem;
+    }
+
+    .book-card {
+      background: var(--white);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .book-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--card-shadow);
+    }
+
+    .book-image {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .book-card:hover .book-image {
+      transform: scale(1.05);
+    }
+
+    .book-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .book-card:hover .book-overlay {
+      opacity: 1;
+    }
+
+    .book-actions {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .book-action-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--white);
+      color: var(--secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .book-action-btn:hover {
+      background: var(--primary);
+      color: var(--secondary);
+      transform: scale(1.1);
+    }
+
+    .book-info {
+      padding: 1.5rem;
+    }
+
+    .book-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--secondary);
+      margin-bottom: 0.5rem;
+    }
+
+    .book-author {
+      color: var(--accent);
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    .book-details {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .book-tag {
+      background: var(--light);
+      color: var(--accent);
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.875rem;
+    }
+
+    .book-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .status-available {
+      background: #E8F5E9;
+      color: #2E7D32;
+    }
+
+    .status-swapped {
+      background: #FFF3E0;
+      color: #E65100;
+    }
+
+    .add-book-btn {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--primary);
+      color: var(--secondary);
+      padding: 1rem 2rem;
+      border-radius: 30px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      box-shadow: 0 4px 15px rgba(238, 212, 126, 0.3);
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+
+    .add-book-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(238, 212, 126, 0.4);
+      background: var(--gradient);
+      color: var(--secondary);
+    }
+
+    .add-book-btn i {
+      font-size: 1.25rem;
+      transition: transform 0.3s ease;
+    }
+
+    .add-book-btn:hover i {
+      transform: rotate(90deg);
+    }
+
+    .alert-danger {
+      background-color: #fff5f5;
+      border: 1px solid #feb2b2;
+      color: #c53030;
+      padding: 1rem;
+      border-radius: 12px;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .books-container {
+        padding: 2rem 1rem;
+      }
+
+      .books-content {
+        padding: 2rem;
+      }
+
+      .books-header h1 {
+        font-size: 2rem;
+      }
+
+      .books-header p {
+        font-size: 1rem;
+      }
+
+      .books-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .add-book-btn {
+        bottom: 1rem;
+        right: 1rem;
+        padding: 0.75rem 1.5rem;
+      }
+    }
+  </style>
+
+  <script src="/js/myBook.js"></script>
+  <%- include('partials/footer') %>

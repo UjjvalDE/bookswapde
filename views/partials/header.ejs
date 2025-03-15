@@ -1,0 +1,420 @@
+<!-- views/partials/header.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Swap | <%= pageTitle %>
+  </title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+  <style>
+    :root {
+      --primary: #EED47E;
+      --secondary: #2C3E50;
+      --accent: #34495E;
+      --light: #F8F9FA;
+      --dark: #1A1A1A;
+      --white: #FFFFFF;
+      --text: #2C3E50;
+      --gradient: linear-gradient(135deg, #EED47E, #F4E5A3);
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    body {
+      background: var(--light);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .navbar {
+      background: var(--white);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+      padding: 1rem 2rem;
+      border-bottom: 1px solid rgba(44, 62, 80, 0.1);
+    }
+
+    .navbar-brand {
+      color: var(--secondary) !important;
+      font-size: 1.75rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(45deg, var(--secondary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-link {
+      color: var(--accent) !important;
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      bottom: 0;
+      left: 50%;
+      background: var(--primary);
+      transition: all 0.3s ease;
+      transform: translateX(-50%);
+    }
+
+    .nav-link:hover {
+      color: var(--primary) !important;
+    }
+
+    .nav-link:hover::after {
+      width: 100%;
+    }
+
+    .nav-item .btn-primary {
+      background: var(--primary);
+      border: none;
+      color: var(--secondary);
+      padding: 0.5rem 1.25rem;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(238, 212, 126, 0.3);
+    }
+
+    .nav-item .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(238, 212, 126, 0.4);
+      background: var(--gradient);
+    }
+
+    .navbar-toggler {
+      border: none;
+      padding: 0.5rem;
+    }
+
+    .navbar-toggler:focus {
+      box-shadow: none;
+    }
+
+    .navbar-toggler-icon {
+      background-image: none;
+      position: relative;
+      width: 24px;
+      height: 2px;
+      background: var(--accent);
+      transition: all 0.3s ease;
+    }
+
+    .navbar-toggler-icon::before,
+    .navbar-toggler-icon::after {
+      content: '';
+      position: absolute;
+      width: 24px;
+      height: 2px;
+      background: var(--accent);
+      transition: all 0.3s ease;
+    }
+
+    .navbar-toggler-icon::before {
+      top: -8px;
+    }
+
+    .navbar-toggler-icon::after {
+      bottom: -8px;
+    }
+
+    .navbar-toggler[aria-expanded="true"] .navbar-toggler-icon {
+      background: transparent;
+    }
+
+    .navbar-toggler[aria-expanded="true"] .navbar-toggler-icon::before {
+      transform: rotate(45deg);
+      top: 0;
+    }
+
+    .navbar-toggler[aria-expanded="true"] .navbar-toggler-icon::after {
+      transform: rotate(-45deg);
+      bottom: 0;
+    }
+
+    /* Login Required Popup Styles */
+    .auth-popup {
+      position: fixed;
+      top: 2rem;
+      right: 2rem;
+      max-width: 400px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 1.5rem;
+      transform: translateX(150%);
+      transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: 1000;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(238, 212, 126, 0.3);
+    }
+
+    .auth-popup.show {
+      transform: translateX(0);
+    }
+
+    .auth-popup-content {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      text-align: left;
+    }
+
+    .auth-popup-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .auth-popup-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      background: var(--primary);
+      border-radius: 12px;
+      font-size: 1.25rem;
+      color: var(--secondary);
+    }
+
+    .auth-popup-text {
+      flex: 1;
+    }
+
+    .auth-popup-title {
+      color: var(--secondary);
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin: 0 0 0.25rem 0;
+    }
+
+    .auth-popup-message {
+      color: var(--accent);
+      font-size: 0.95rem;
+      margin: 0;
+      opacity: 0.8;
+    }
+
+    .auth-popup-buttons {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 0.5rem;
+    }
+
+    .auth-popup-btn {
+      flex: 1;
+      padding: 0.75rem 1.25rem;
+      border-radius: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      text-align: center;
+      transition: all 0.3s ease;
+      font-size: 0.95rem;
+    }
+
+    .auth-popup-btn.login {
+      background: var(--primary);
+      color: var(--secondary);
+      box-shadow: 0 4px 12px rgba(238, 212, 126, 0.3);
+    }
+
+    .auth-popup-btn.signup {
+      background: var(--light);
+      color: var(--secondary);
+      border: 2px solid var(--primary);
+    }
+
+    .auth-popup-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .auth-popup-btn.login:hover {
+      background: var(--gradient);
+      box-shadow: 0 6px 20px rgba(238, 212, 126, 0.4);
+    }
+
+    .auth-popup-btn.signup:hover {
+      background: var(--primary);
+      color: var(--secondary);
+    }
+
+    .auth-popup-close {
+      background: none;
+      border: none;
+      color: var(--accent);
+      padding: 0.25rem;
+      cursor: pointer;
+      opacity: 0.5;
+      transition: opacity 0.3s ease;
+      margin: -0.5rem -0.5rem 0 0;
+    }
+
+    .auth-popup-close:hover {
+      opacity: 1;
+    }
+
+    @media (max-width: 768px) {
+      .auth-popup {
+        top: auto;
+        bottom: 1rem;
+        right: 1rem;
+        left: 1rem;
+        max-width: none;
+        margin: 0 auto;
+      }
+    }
+
+    .content-wrapper {
+      flex: 1;
+      padding-bottom: 2rem;
+    }
+
+    @media (max-width: 991px) {
+      .navbar-collapse {
+        background: var(--white);
+        padding: 1rem;
+        border-radius: 12px;
+        margin-top: 1rem;
+        box-shadow: var(--shadow);
+      }
+
+      .nav-link {
+        padding: 0.75rem 1rem;
+      }
+
+      .nav-item .btn-primary {
+        width: 100%;
+        margin-top: 0.5rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg">
+    <div class="container">
+      <a class="navbar-brand" href="/">Book Swap</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto" id="navItems">
+          <!-- Links will be added dynamically using JS -->
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Auth Required Popup -->
+  <div class="auth-popup" id="authPopup">
+    <div class="auth-popup-content">
+      <div class="auth-popup-header">
+        <div class="auth-popup-icon">
+          <i class="fas fa-lock"></i>
+        </div>
+        <button class="auth-popup-close" id="closeAuthPopup" aria-label="Close">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="auth-popup-text">
+        <h3 class="auth-popup-title">Sign In Required</h3>
+        <p class="auth-popup-message">Please sign in to access this feature and explore our book collection</p>
+      </div>
+      <div class="auth-popup-buttons">
+        <a href="/login" class="auth-popup-btn login">
+          <i class="fas fa-sign-in-alt"></i>
+          Sign In
+        </a>
+        <a href="/signup" class="auth-popup-btn signup">Sign Up</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-wrapper">
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const navItems = document.getElementById("navItems");
+        const token = localStorage.getItem("token");
+        const authPopup = document.getElementById("authPopup");
+        const closeAuthPopup = document.getElementById("closeAuthPopup");
+        let links = `
+          <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+        `;
+
+        if (token) {
+          links += `
+            <li class="nav-item"><a class="nav-link" href="/add-book">Add Book</a></li>
+            <li class="nav-item"><a class="nav-link" href="/myBook">My Books</a></li>
+            <li class="nav-item"><a class="nav-link" href="/profile">Profile</a></li>
+            <li class="nav-item"><a class="nav-link" href="#" onclick="logout()">Logout</a></li>
+          `;
+        } else {
+          links += `
+            <li class="nav-item"><a class="nav-link" href="/login">Login</a></li>
+            <li class="nav-item"><a class="nav-link btn btn-primary" href="/signup">Sign Up</a></li>
+          `;
+        }
+
+        navItems.innerHTML = links;
+
+        // Function to show auth popup
+        window.showAuthPopup = function () {
+          if (!token) {
+            authPopup.classList.add('show');
+            setTimeout(() => {
+              authPopup.classList.remove('show');
+            }, 5000); // Hide after 5 seconds
+          }
+        }
+
+        // Close popup when clicking the close button
+        if (closeAuthPopup) {
+          closeAuthPopup.addEventListener('click', () => {
+            authPopup.classList.remove('show');
+          });
+        }
+
+        // Check if user needs authentication for current page
+        const protectedPaths = ['/add-book', '/myBook', '/profile', '/edit-book'];
+        const currentPath = window.location.pathname;
+        const publicPaths = ['/login', '/signup', '/', '/verify'];
+
+        // Only show auth popup and redirect for protected paths, not for public paths
+        if (protectedPaths.some(path => currentPath.startsWith(path)) &&
+          !publicPaths.some(path => currentPath.startsWith(path)) &&
+          !token) {
+          showAuthPopup();
+          setTimeout(() => {
+            window.location.href = '/login';
+          }, 3000);
+        }
+      });
+
+      function logout() {
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+      }
+    </script>
+  </div>
+</body>
+
+</html>

@@ -1,0 +1,599 @@
+<%- include('partials/header', { pageTitle: pageTitle, user: user }) %>
+
+  <div class="detail-container">
+    <div class="detail-wrapper">
+      <div class="detail-content">
+        <div class="book-header">
+          <h1 id="myBookName" class="book-title">Loading...</h1>
+          <div id="myBookError" class="alert alert-danger" style="display: none;"></div>
+        </div>
+
+        <div class="book-grid">
+          <div class="book-image-section">
+            <div class="book-image-wrapper">
+              <img id="myBookCover"
+                src="https://images.pexels.com/photos/1148399/pexels-photo-1148399.jpeg?auto=compress&cs=tinysrgb&w=1200"
+                alt="Cover Image">
+              <div class="book-image-overlay">
+                <i class="fas fa-book"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="book-info-section">
+            <div class="info-card">
+              <h2>Book Details</h2>
+              <div class="info-grid">
+                <div class="info-item">
+                  <i class="fas fa-bookmark"></i>
+                  <div class="info-content">
+                    <span class="info-label">Type</span>
+                    <span id="myBookType" class="info-value">Loading...</span>
+                  </div>
+                </div>
+                <div class="info-item">
+                  <i class="fas fa-tag"></i>
+                  <div class="info-content">
+                    <span class="info-label">Price</span>
+                    <span id="myBookPrice" class="info-value">Loading...</span>
+                  </div>
+                </div>
+              </div>
+              <div class="description-section">
+                <h3>Description</h3>
+                <p id="myBookDescription" class="description-text">Loading...</p>
+              </div>
+            </div>
+
+            <div class="action-buttons">
+              <div id="admin" hidden>
+                <button id="editBtn" onclick="editBook()" class="btn btn-primary">
+                  <i class="fas fa-edit"></i>
+                  <span>Edit Book</span>
+                </button>
+                <button id="deleteBtn" onclick="deleteBook()" class="btn btn-danger">
+                  <i class="fas fa-trash"></i>
+                  <span>Delete Book</span>
+                </button>
+              </div>
+              <div id="common">
+                <a href="/myBook" class="btn btn-secondary">
+                  <i class="fas fa-arrow-left"></i>
+                  <span>Back to MyBooks</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="owner-section">
+        <div class="owner-card">
+          <div class="owner-header">
+            <i class="fas fa-user-circle"></i>
+            <h2>Book Owner</h2>
+          </div>
+          <div class="owner-info">
+            <div class="info-item">
+              <i class="fas fa-user"></i>
+              <div class="info-content">
+                <span class="info-label">Name</span>
+                <span id="bookOwnerName" class="info-value">Loading...</span>
+              </div>
+            </div>
+            <div class="info-item">
+              <i class="fas fa-envelope"></i>
+              <div class="info-content">
+                <span class="info-label">Email</span>
+                <span id="bookOwnerEmail" class="info-value">Loading...</span>
+              </div>
+            </div>
+            <div class="info-item">
+              <i class="fas fa-phone"></i>
+              <div class="info-content">
+                <span class="info-label">Phone</span>
+                <span id="bookOwnerPhone" class="info-value">Loading...</span>
+              </div>
+            </div>
+            <div class="info-item">
+              <i class="fas fa-map-marker-alt"></i>
+              <div class="info-content">
+                <span class="info-label">Address</span>
+                <span id="bookOwnerAddress" class="info-value">Loading...</span>
+              </div>
+            </div>
+          </div>
+          <div class="owner-actions">
+            <button class="contact-owner-btn btn btn-primary">
+              <i class="fas fa-envelope"></i>
+              <span>I'm Interested</span>
+            </button>
+          </div>
+          <div class="map-section">
+            <div id="map"></div>
+            <p id="distanceLabel" class="distance-text">How far from seller: Calculating...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="reviews-section">
+      <div class="reviews-card">
+        <div class="reviews-header">
+          <i class="fas fa-star"></i>
+          <h2>Online Information</h2>
+        </div>
+        <div id="reviewsContainer" class="reviews-content"></div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    :root {
+      --primary: #EED47E;
+      --secondary: #2C3E50;
+      --accent: #34495E;
+      --light: #F8F9FA;
+      --dark: #1A1A1A;
+      --white: #FFFFFF;
+      --text: #2C3E50;
+      --gradient: linear-gradient(135deg, #EED47E, #F4E5A3);
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .detail-container {
+      min-height: 100vh;
+      padding: 4rem 2rem;
+      background: var(--light);
+    }
+
+    .detail-wrapper {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .detail-content {
+      background: var(--white);
+      border-radius: 30px;
+      padding: 3rem;
+      box-shadow: var(--card-shadow);
+      margin-bottom: 2rem;
+    }
+
+    .book-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .book-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--secondary);
+      margin-bottom: 1rem;
+      background: linear-gradient(45deg, var(--secondary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .book-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      margin-bottom: 2rem;
+    }
+
+    .book-image-section {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .book-image-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 400px;
+      aspect-ratio: 2/3;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .book-image-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .book-image-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .book-image-overlay i {
+      color: var(--white);
+      font-size: 3rem;
+    }
+
+    .book-image-wrapper:hover img {
+      transform: scale(1.05);
+    }
+
+    .book-image-wrapper:hover .book-image-overlay {
+      opacity: 1;
+    }
+
+    .info-card {
+      background: var(--white);
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: var(--shadow);
+    }
+
+    .info-card h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--secondary);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .info-card h2::before {
+      content: '';
+      width: 4px;
+      height: 24px;
+      background: var(--primary);
+      border-radius: 2px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .info-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .info-item i {
+      font-size: 1.5rem;
+      color: var(--primary);
+    }
+
+    .info-content {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .info-label {
+      font-size: 0.875rem;
+      color: var(--accent);
+      opacity: 0.8;
+    }
+
+    .info-value {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--secondary);
+    }
+
+    .description-section {
+      margin-top: 2rem;
+    }
+
+    .description-section h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--secondary);
+      margin-bottom: 1rem;
+    }
+
+    .description-text {
+      color: var(--accent);
+      line-height: 1.6;
+      opacity: 0.9;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: 30px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: var(--secondary);
+    }
+
+    .btn-primary:hover {
+      background: var(--gradient);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(238, 212, 126, 0.4);
+    }
+
+    .btn-danger {
+      background: #ff6b6b;
+      color: var(--white);
+    }
+
+    .btn-danger:hover {
+      background: #ff5252;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+    }
+
+    .btn-secondary {
+      background: var(--accent);
+      color: var(--white);
+      text-decoration: none;
+    }
+
+    .btn-secondary:hover {
+      background: var(--secondary);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(44, 62, 80, 0.4);
+    }
+
+    .owner-section {
+      margin-bottom: 2rem;
+    }
+
+    .owner-card {
+      background: var(--white);
+      border-radius: 30px;
+      padding: 2rem;
+      box-shadow: var(--card-shadow);
+    }
+
+    .owner-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .owner-header i {
+      font-size: 2rem;
+      color: var(--primary);
+    }
+
+    .owner-header h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--secondary);
+      margin: 0;
+    }
+
+    .owner-info {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .map-section {
+      margin-top: 2rem;
+    }
+
+    #map {
+      height: 200px;
+      border-radius: 20px;
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+
+    .distance-text {
+      text-align: center;
+      color: var(--accent);
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    .reviews-section {
+      margin-top: 2rem;
+    }
+
+    .reviews-card {
+      background: var(--white);
+      border-radius: 30px;
+      padding: 2rem;
+      box-shadow: var(--card-shadow);
+    }
+
+    .reviews-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .reviews-header i {
+      font-size: 2rem;
+      color: var(--primary);
+    }
+
+    .reviews-header h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--secondary);
+      margin: 0;
+    }
+
+    .reviews-content {
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    .alert-danger {
+      background-color: #fff5f5;
+      border: 1px solid #feb2b2;
+      color: #c53030;
+      padding: 1rem;
+      border-radius: 12px;
+      margin-bottom: 1.5rem;
+    }
+
+    .owner-actions {
+      margin-top: 2rem;
+      display: flex;
+      justify-content: center;
+    }
+
+    .contact-owner-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 2rem;
+      background: var(--primary);
+      color: var(--secondary);
+      border: none;
+      border-radius: 30px;
+      font-weight: 600;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(238, 212, 126, 0.3);
+    }
+
+    .contact-owner-btn:hover {
+      background: var(--gradient);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(238, 212, 126, 0.4);
+    }
+
+    .contact-owner-btn i {
+      font-size: 1.2rem;
+    }
+
+    .contact-popup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .contact-popup.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .popup-content {
+      background: var(--white);
+      padding: 2rem;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 500px;
+      position: relative;
+      transform: translateY(20px);
+      transition: all 0.3s ease;
+    }
+
+    .contact-popup.show .popup-content {
+      transform: translateY(0);
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--accent);
+      cursor: pointer;
+      padding: 0.5rem;
+      transition: color 0.3s ease;
+    }
+
+    .close-btn:hover {
+      color: var(--secondary);
+    }
+
+    @media (max-width: 992px) {
+      .book-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+
+      .book-image-wrapper {
+        max-width: 300px;
+      }
+
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .owner-info {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .detail-container {
+        padding: 2rem 1rem;
+      }
+
+      .detail-content,
+      .owner-card,
+      .reviews-card {
+        padding: 1.5rem;
+      }
+
+      .book-title {
+        font-size: 2rem;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+
+  <!-- OpenLayers for Map -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v7.3.0/ol.css">
+  <script src="https://cdn.jsdelivr.net/npm/ol@v7.3.0/dist/ol.js"></script>
+
+  <script src="/js/detail.js"></script>
+  <%- include('partials/footer') %>

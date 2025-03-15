@@ -1,0 +1,351 @@
+<!-- views/add-book.ejs -->
+<%- include('partials/header', { pageTitle: pageTitle, user: user }) %>
+
+  <div class="add-book-container">
+    <div class="add-book-wrapper">
+      <div class="add-book-header">
+        <h1>Add a Book</h1>
+        <p>Share your books with the community</p>
+      </div>
+
+      <div class="add-book-content">
+        <div class="form-card">
+          <div id="addBookError" class="alert alert-danger" style="display: none;"></div>
+          <div id="addBookSuccess" class="alert alert-success" style="display: none;">
+            <i class="fas fa-check-circle"></i>
+            <span>Book added successfully!</span>
+          </div>
+
+          <form id="addBookForm">
+            <div class="form-group">
+              <div class="book-name-group">
+                <div class="input-wrapper">
+                  <label for="bookName" class="form-label">
+                    <i class="fas fa-book"></i>
+                    Book Name
+                  </label>
+                  <input type="text" class="form-control" id="bookName" name="bookName" placeholder="Enter book name"
+                    required>
+                </div>
+                <button type="button" onclick="autofill()" class="btn btn-secondary">
+                  <i class="fas fa-magic"></i>
+                  <span>Generate</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div class="input-wrapper">
+                <label for="coverImage" class="form-label">
+                  <i class="fas fa-image"></i>
+                  Cover Image URL
+                </label>
+                <input type="text" class="form-control" id="coverImage" name="coverImage"
+                  placeholder="Enter image URL (e.g., https://example.com/cover.jpg)">
+              </div>
+              <div class="image-preview" id="coverPreview">
+                <img src="" alt="Cover Preview">
+                <div class="preview-overlay">
+                  <i class="fas fa-book"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div class="input-wrapper">
+                <label for="description" class="form-label">
+                  <i class="fas fa-align-left"></i>
+                  Description
+                </label>
+                <textarea class="form-control" id="description" name="description" rows="4"
+                  placeholder="Enter book description"></textarea>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div class="input-wrapper">
+                <label for="bookType" class="form-label">
+                  <i class="fas fa-tag"></i>
+                  Book Type
+                </label>
+                <select class="form-select" id="bookType" name="bookType" required>
+                  <option value="" disabled selected>Select book type</option>
+                  <option value="horror">Horror</option>
+                  <option value="mystery">Mystery</option>
+                  <option value="thriller">Thriller</option>
+                  <option value="fantasy">Fantasy</option>
+                  <option value="sci-fi">Sci-Fi</option>
+                  <option value="romance">Romance</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div class="input-wrapper">
+                <label for="price" class="form-label">
+                  <i class="fas fa-euro-sign"></i>
+                  Price
+                </label>
+                <input type="number" class="form-control" id="price" name="price" step="0.01" placeholder="Enter price"
+                  required>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-plus"></i>
+                <span>Add Book</span>
+              </button>
+              <a href="/myBook" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i>
+                <span>Back to MyBooks</span>
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    :root {
+      --primary: #EED47E;
+      --secondary: #2C3E50;
+      --accent: #34495E;
+      --light: #F8F9FA;
+      --dark: #1A1A1A;
+      --white: #FFFFFF;
+      --text: #2C3E50;
+      --gradient: linear-gradient(135deg, #EED47E, #F4E5A3);
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .add-book-container {
+      min-height: 100vh;
+      padding: 4rem 2rem;
+      background: var(--light);
+    }
+
+    .add-book-wrapper {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .add-book-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .add-book-header h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--secondary);
+      margin-bottom: 0.5rem;
+      background: linear-gradient(45deg, var(--secondary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .add-book-header p {
+      color: var(--accent);
+      font-size: 1.1rem;
+      opacity: 0.8;
+    }
+
+    .form-card {
+      background: var(--white);
+      border-radius: 30px;
+      padding: 3rem;
+      box-shadow: var(--card-shadow);
+    }
+
+    .form-group {
+      margin-bottom: 2rem;
+    }
+
+    .book-name-group {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 1rem;
+      align-items: end;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .form-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--secondary);
+      margin-bottom: 0.5rem;
+    }
+
+    .form-label i {
+      color: var(--primary);
+    }
+
+    .form-control,
+    .form-select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 2px solid var(--light);
+      border-radius: 15px;
+      font-size: 1rem;
+      color: var(--accent);
+      background-color: var(--white);
+      transition: all 0.3s ease;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(238, 212, 126, 0.2);
+    }
+
+    .image-preview {
+      margin-top: 1rem;
+      position: relative;
+      width: 100%;
+      max-width: 300px;
+      aspect-ratio: 2/3;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .image-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .preview-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .preview-overlay i {
+      color: var(--white);
+      font-size: 2rem;
+    }
+
+    .image-preview:hover img {
+      transform: scale(1.05);
+    }
+
+    .image-preview:hover .preview-overlay {
+      opacity: 1;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: 15px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: var(--secondary);
+    }
+
+    .btn-primary:hover {
+      background: var(--gradient);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(238, 212, 126, 0.4);
+    }
+
+    .btn-secondary {
+      background: var(--accent);
+      color: var(--white);
+    }
+
+    .btn-secondary:hover {
+      background: var(--secondary);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(44, 62, 80, 0.4);
+    }
+
+    .alert {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 1rem;
+      border-radius: 12px;
+      margin-bottom: 1.5rem;
+    }
+
+    .alert-danger {
+      background-color: #fff5f5;
+      border: 1px solid #feb2b2;
+      color: #c53030;
+    }
+
+    .alert-success {
+      background-color: #f0fff4;
+      border: 1px solid #9ae6b4;
+      color: #2f855a;
+    }
+
+    @media (max-width: 768px) {
+      .add-book-container {
+        padding: 2rem 1rem;
+      }
+
+      .add-book-header h1 {
+        font-size: 2rem;
+      }
+
+      .add-book-header p {
+        font-size: 1rem;
+      }
+
+      .form-card {
+        padding: 1.5rem;
+      }
+
+      .book-name-group {
+        grid-template-columns: 1fr;
+      }
+
+      .form-actions {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+
+  <script src="/js/add-book.js"></script>
+  <%- include('partials/footer') %>

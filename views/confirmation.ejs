@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookSwap - Account Confirmed</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #EED47E;
+            --secondary: #2C3E50;
+            --accent: #34495E;
+            --light: #F8F9FA;
+            --dark: #1A1A1A;
+            --white: #FFFFFF;
+            --text: #2C3E50;
+            --gradient: linear-gradient(135deg, #EED47E, #F4E5A3);
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            background: var(--light);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .confirmation-container {
+            max-width: 600px;
+            width: 100%;
+            background: var(--white);
+            padding: 3rem;
+            border-radius: 30px;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .confirmation-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+            animation: scaleIn 0.5s ease-out;
+        }
+
+        .confirmation-icon i {
+            font-size: 2.5rem;
+            color: var(--secondary);
+        }
+
+        .confirmation-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--secondary);
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .confirmation-message {
+            font-size: 1.1rem;
+            color: var(--accent);
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            background: var(--primary);
+            color: var(--secondary);
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(238, 212, 126, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(238, 212, 126, 0.4);
+            background: var(--gradient);
+        }
+
+        .btn i {
+            font-size: 1.1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .btn:hover i {
+            transform: translateX(3px);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+            }
+
+            to {
+                transform: scale(1);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .confirmation-container {
+                padding: 2rem;
+            }
+
+            .confirmation-title {
+                font-size: 1.75rem;
+            }
+
+            .confirmation-message {
+                font-size: 1rem;
+            }
+
+            .btn {
+                padding: 0.75rem 1.5rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="confirmation-container">
+        <div class="confirmation-icon">
+            <i class="fas fa-check"></i>
+        </div>
+        <h1 class="confirmation-title">Thank You for Joining BookSwap!</h1>
+        <p class="confirmation-message">
+            Your account has been successfully confirmed.<br>
+            You can now start swapping books with other readers.
+        </p>
+        <div class="btn-container">
+            <a href="/login" class="btn">
+                <span>Go to Login</span>
+                <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</body>
+
+</html>

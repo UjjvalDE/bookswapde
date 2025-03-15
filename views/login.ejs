@@ -1,0 +1,288 @@
+<!-- views/login.ejs -->
+<%- include('partials/header', { pageTitle: pageTitle, user: user }) %>
+
+  <div class="login-container">
+    <div class="login-wrapper">
+      <div class="login-content">
+        <div class="login-header">
+          <h1>Welcome Back</h1>
+          <p>Sign in to continue your reading journey</p>
+        </div>
+
+        <div id="loginError" class="alert alert-danger" style="display: none;"></div>
+
+        <form id="loginForm" class="login-form">
+          <div class="form-group">
+            <label for="email">Email</label>
+            <div class="input-group">
+              <span class="input-icon"><i class="fas fa-envelope"></i></span>
+              <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+            <div class="input-group">
+              <span class="input-icon"><i class="fas fa-lock"></i></span>
+              <input type="password" class="form-control" id="password" name="password"
+                placeholder="Enter your password" required>
+            </div>
+          </div>
+
+          <div class="form-group remember-forgot">
+            <div class="form-check">
+              <input type="checkbox" class="form-check-input" id="remember">
+              <label class="form-check-label" for="remember">Remember me</label>
+            </div>
+            <a href="/forgot-password" class="forgot-link">Forgot Password?</a>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100">
+            <span>Sign In</span>
+            <i class="fas fa-arrow-right"></i>
+          </button>
+        </form>
+
+        <div class="login-footer">
+          <p>Don't have an account? <a href="/signup">Sign up</a></p>
+        </div>
+      </div>
+
+      <div class="login-image">
+        <img src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=800&q=80"
+          alt="Books">
+      </div>
+    </div>
+  </div>
+
+  <style>
+    :root {
+      --primary: #EED47E;
+      --secondary: #2C3E50;
+      --accent: #34495E;
+      --light: #F8F9FA;
+      --dark: #1A1A1A;
+      --white: #FFFFFF;
+      --text: #2C3E50;
+      --gradient: linear-gradient(135deg, #EED47E, #F4E5A3);
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .login-container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      background: var(--light);
+    }
+
+    .login-wrapper {
+      display: flex;
+      width: 100%;
+      max-width: 1000px;
+      background: var(--white);
+      border-radius: 30px;
+      overflow: hidden;
+      box-shadow: var(--card-shadow);
+    }
+
+    .login-content {
+      flex: 1;
+      padding: 3rem;
+    }
+
+    .login-image {
+      flex: 1;
+      background: var(--gradient);
+      position: relative;
+      overflow: hidden;
+      display: none;
+    }
+
+    .login-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.9;
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .login-header h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--secondary);
+      margin-bottom: 0.5rem;
+      background: linear-gradient(45deg, var(--secondary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .login-header p {
+      color: var(--accent);
+      font-size: 1.1rem;
+      opacity: 0.8;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--secondary);
+      font-weight: 500;
+    }
+
+    .input-group {
+      position: relative;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--accent);
+      opacity: 0.5;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.875rem 1rem 0.875rem 3rem;
+      border: 2px solid rgba(44, 62, 80, 0.1);
+      border-radius: 12px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(238, 212, 126, 0.1);
+      outline: none;
+    }
+
+    .remember-forgot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-check {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .form-check-input {
+      width: 1.2rem;
+      height: 1.2rem;
+      border-color: var(--accent);
+    }
+
+    .form-check-input:checked {
+      background-color: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .forgot-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.95rem;
+      transition: color 0.3s ease;
+    }
+
+    .forgot-link:hover {
+      color: var(--primary);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      border: none;
+      color: var(--secondary);
+      padding: 1rem;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(238, 212, 126, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(238, 212, 126, 0.4);
+      background: var(--gradient);
+    }
+
+    .btn-primary i {
+      transition: transform 0.3s ease;
+    }
+
+    .btn-primary:hover i {
+      transform: translateX(5px);
+    }
+
+    .login-footer {
+      text-align: center;
+      margin-top: 2rem;
+      color: var(--accent);
+    }
+
+    .login-footer a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.3s ease;
+    }
+
+    .login-footer a:hover {
+      color: var(--secondary);
+    }
+
+    .alert-danger {
+      background-color: #fff5f5;
+      border: 1px solid #feb2b2;
+      color: #c53030;
+      padding: 1rem;
+      border-radius: 12px;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (min-width: 992px) {
+      .login-image {
+        display: block;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .login-wrapper {
+        max-width: 100%;
+      }
+
+      .login-content {
+        padding: 2rem;
+      }
+
+      .login-header h1 {
+        font-size: 2rem;
+      }
+
+      .login-header p {
+        font-size: 1rem;
+      }
+    }
+  </style>
+
+  <script src="/js/login.js"></script>
+  <%- include('partials/footer') %>

@@ -1,0 +1,209 @@
+<!-- views/partials/footer.ejs -->
+</div> <!-- Closes content-wrapper from header -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <h3>Book Swap</h3>
+        <p>Swap, read, and connect with book lovers!</p>
+      </div>
+      <div class="footer-links">
+        <div class="footer-section">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/about">About</a></li>
+            <li><a href="/contact">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="/privacy">Privacy Policy</a></li>
+            <li><a href="/terms">Terms of Service</a></li>
+            <li><a href="/cookies">Cookie Policy</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4>Connect</h4>
+          <div class="social-links">
+            <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© <%= new Date().getFullYear() %> Book Swap. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    background: var(--secondary);
+    color: var(--white);
+    padding: 4rem 0 2rem;
+    margin-top: auto;
+  }
+
+  .footer-content {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 4rem;
+    margin-bottom: 3rem;
+  }
+
+  .footer-brand h3 {
+    font-size: 1.75rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    background: linear-gradient(45deg, var(--primary), #F4E5A3);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .footer-brand p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  .footer-links {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+
+  .footer-section h4 {
+    color: var(--primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+  }
+
+  .footer-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .footer-section ul li {
+    margin-bottom: 0.75rem;
+  }
+
+  .footer-section ul li a {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+
+  .footer-section ul li a:hover {
+    color: var(--primary);
+    transform: translateX(5px);
+  }
+
+  .social-links {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .social-link {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--white);
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+
+  .social-link:hover {
+    background: var(--primary);
+    color: var(--secondary);
+    transform: translateY(-3px);
+  }
+
+  .footer-bottom {
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  @media (max-width: 991px) {
+    .footer-content {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    .footer-links {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 576px) {
+    .footer-links {
+      grid-template-columns: 1fr;
+    }
+
+    .footer {
+      padding: 3rem 0 1.5rem;
+    }
+  }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function checkTokenExpiration() {
+    const token = localStorage.getItem('token');
+    const alertDiv = document.getElementById('tokenExpiredAlert');
+
+    if (!token) return;
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const expiry = payload.exp * 1000;
+      const now = Date.now();
+
+      if (now >= expiry) {
+        if (alertDiv) {
+          alertDiv.style.display = 'block';
+          setTimeout(() => {
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+          }, 2000);
+        } else {
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+        }
+      }
+    } catch (err) {
+      console.error('Error decoding token:', err);
+      if (alertDiv) {
+        alertDiv.textContent = 'Invalid token on Book Swap. Redirecting to login...';
+        alertDiv.style.display = 'block';
+        setTimeout(() => {
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+        }, 2000);
+      } else {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+      }
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    checkTokenExpiration();
+    setInterval(checkTokenExpiration, 60000);
+  });
+</script>
+</body>
+
+</html>
