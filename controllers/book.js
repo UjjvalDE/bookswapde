@@ -229,7 +229,7 @@ module.exports = {
             // Base query for available books where addedBy is not the current user
             let query = {
                 available: true,
-                addedBy: { $ne: data.userData?.Data?._id } // Only show books not added by current user
+                addedBy: { $ne: data.userData && data.userData.Data ? data.userData.Data._id : null } // Only show books not added by current user
             };
 
             // Build search query
@@ -263,7 +263,7 @@ module.exports = {
                 .exec();
 
             // If user is authenticated and has interests, sort by interests
-            if (data.userData?.interestedBooks?.length > 0) {
+            if (data.userData && data.userData.interestedBooks && data.userData.interestedBooks.length > 0) {
                 const userInterests = data.userData.interestedBooks
                     .filter(book => typeof book === 'string')
                     .map(book => book.toLowerCase());
@@ -291,9 +291,9 @@ module.exports = {
                 // Format book data
                 const formattedBooks = bookData.map(book => ({
                     ...book,
-                    sellerName: book.addedBy?.name || 'Unknown Seller',
-                    sellerEmail: book.addedBy?.email,
-                    addedBy: book.addedBy?._id // Keep only the ID in addedBy field
+                    sellerName: book.addedBy && book.addedBy.name ? book.addedBy.name : 'Unknown Seller',
+                    sellerEmail: book.addedBy ? book.addedBy.email : null,
+                    addedBy: book.addedBy ? book.addedBy._id : null // Keep only the ID in addedBy field
                 }));
 
                 sendData.Data = formattedBooks;

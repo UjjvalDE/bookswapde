@@ -175,12 +175,11 @@ module.exports = {
 		return date1.getFullYear() + "-" + ((month > 9) ? month : '0' + month) + "-" + ((day > 9) ? day : '0' + day) + " " + ((hour > 9) ? hour : '0' + hour) + ':' + ((min > 9) ? min : '0' + min) + ':' + ((sec > 9) ? sec : '0' + sec);
 	},
 	__sendEmail: function (receiver_email, subject, html, link) {
-		// require()
 		var trtransporter = nodemailer.createTransport({
 			service: 'gmail',
 			auth: {
-				user: 'ujjvalvaghasiya@gmail.com',
-				pass: 'ppbm exwx eacc sxrs'
+				user: process.env.EMAIL_FROM || 'ujjvalvaghasiya@gmail.com',
+				pass: process.env.EMAIL_PASSWORD || 'ppbm exwx eacc sxrs'
 			}
 		});
 		if (link) {
@@ -188,7 +187,7 @@ module.exports = {
 			let name = link.split('/').reverse()[0];
 
 			var mailOptions = {
-				from: 'Bookswap<ujjvalvaghasiya@gmail.com>',
+				from: `Bookswap<${process.env.EMAIL_FROM || 'ujjvalvaghasiya@gmail.com'}>`,
 				to: receiver_email,
 				subject: subject,
 				html: html,
@@ -199,24 +198,22 @@ module.exports = {
 			}
 		} else {
 			var mailOptions = {
-				from: 'Bookswap<ujjvalvaghasiya@gmail.com>',
+				from: `Bookswap<${process.env.EMAIL_FROM || 'ujjvalvaghasiya@gmail.com'}>`,
 				to: receiver_email,
 				subject: subject,
 				html: html,
 			}
 		}
 
-		console.log(mailOptions);
+		console.log("Mail options:", mailOptions);
 
 		trtransporter.sendMail(mailOptions, function (err, info) {
 			if (err) {
-				console.log("13", err)
+				console.error("Email sending error:", err);
 			} else {
-				console.log('email send:' + info.response)
+				console.log('Email sent:', info.response);
 			}
-
 		});
-
 	},
 	formatTimeToHHMMSS: function (seconds = 0, isHr = true, isMin = true, isSec = true) {
 		seconds = Math.abs(seconds)

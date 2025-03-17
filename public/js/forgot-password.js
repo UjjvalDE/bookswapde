@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             window.location.href = '/login';
                         }, 500);
                     }
-                }, 5000);
+                }, 3000);
 
             } else {
                 errorDiv.textContent = data.message || 'Failed to send reset link. Please try again.';

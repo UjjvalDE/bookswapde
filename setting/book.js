@@ -7,7 +7,7 @@ module.exports = {
             res.render('add-book', { pageTitle: 'add-book', user: null });
         })
         app.get('/myBook', async (req, res) => {
-            res.render('myBook', { pageTitle: 'myBook', user: null })
+            res.render('mybook', { pageTitle: 'My Books', user: null })
         })
         app.get('/book/:id', async (req, res) => {
             res.render('detail', { pageTitle: 'Book details', user: null })

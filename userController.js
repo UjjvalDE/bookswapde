@@ -98,7 +98,7 @@ module.exports = {
             // Send verification email
             try {
                 await ejs.renderFile(
-                    path.join(__dirname, '../templates/confirm_account.ejs'),
+                    path.join('/Volumes/D/iu/project/Bookstore-master/templates/confirm_account.ejs'),
                     { link: verificationLink },
                     async (err, emailContent) => {
                         if (!err) {
@@ -107,8 +107,6 @@ module.exports = {
                                 "Confirm your Bookswap account",
                                 emailContent
                             );
-                        } else {
-                            console.error('Error rendering email template:', err);
                         }
                     }
                 );

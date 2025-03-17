@@ -261,28 +261,41 @@ document.addEventListener('DOMContentLoaded', async () => {
         const buttonLoader = document.querySelector('.button-loader');
         if (buttonLoader) buttonLoader.style.display = 'block';
 
-        const formData = {
+        // Validate required fields
+        const requiredFields = {
             name: document.getElementById('name').value,
             email: document.getElementById('email').value,
             password: document.getElementById('password').value,
-            address: `${streetInput.value}, ${cityInput.value}, ${countryInput.value}`,
-            postcode: parseInt(postcodeInput.value) || 0,
             country_code: countryCodeSelect.value,
             number: document.getElementById('number').value,
+            address: streetInput.value ? `${streetInput.value}, ${cityInput.value}, ${countryInput.value}` : '',
+            postcode: postcodeInput.value,
             interestedBooks: Array.from(document.querySelectorAll('input[name="interestedBooks"]:checked'))
                 .map(cb => cb.value)
         };
+
+        // Check for missing fields
+        const missingFields = Object.entries(requiredFields)
+            .filter(([key, value]) => !value || (Array.isArray(value) && value.length === 0))
+            .map(([key]) => key);
+
+        if (missingFields.length > 0) {
+            showError(`Please fill in all required fields: ${missingFields.join(', ')}`);
+            submitButton.disabled = false;
+            if (buttonLoader) buttonLoader.style.display = 'none';
+            return;
+        }
 
         try {
             const response = await fetch('/api/signup', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
+                body: JSON.stringify(requiredFields)
             });
 
             const data = await response.json();
 
-            if (response.ReturnCode === 200) {
+            if (data.ReturnCode === 200) {
                 const emailCallModal = new bootstrap.Modal(document.getElementById('emailCall'));
                 emailCallModal.show();
 
@@ -297,7 +310,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     window.location.href = '/login';
                 }, 3000);
             } else {
-                showError(data.message || 'Error creating account. Please try again.');
+                showError(data.ReturnMsg || 'Error creating account. Please try again.');
             }
         } catch (error) {
             console.error('Signup error:', error);
@@ -313,7 +326,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         signupError.style.display = 'block';
         setTimeout(() => {
             signupError.style.display = 'none';
-        }, 5000);
+        }, 3000);
     }
 
     // Initialize country codes
