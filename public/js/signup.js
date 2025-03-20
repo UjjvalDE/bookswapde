@@ -3,51 +3,41 @@ document.addEventListener('DOMContentLoaded', async () => {
     const countryCodeSelect = document.getElementById('country_code');
     const cityInput = document.getElementById('city');
     const streetInput = document.getElementById('street');
-    const postcodeInput = document.getElementById('postcode');
+    const streetNumberInput = document.getElementById('streetNumber');
+    const citySuggestions = document.getElementById('citySuggestions');
+    const streetSuggestions = document.getElementById('streetSuggestions');
     const countryInput = document.getElementById('country');
-    const citySearch = document.getElementById('city_search');
-    const streetSearch = document.getElementById('street_search');
-    const citySuggestions = document.getElementById('city_suggestions');
-    const streetSuggestions = document.getElementById('street_suggestions');
-    const addressFields = document.querySelector('.address-fields');
+    const postcodeInput = document.getElementById('postcode');
     const signupForm = document.getElementById('signupForm');
-    const signupError = document.getElementById('signupError');
     const submitButton = document.querySelector('.btn-submit');
+    const errorDiv = document.getElementById('signupError');
 
-    let map = null;
-    let marker = null;
-    let debounceTimer;
+    // Disable autofill for address fields
+    [cityInput, streetInput, streetNumberInput, postcodeInput].forEach(input => {
+        input.setAttribute('autocomplete', 'off');
+    });
 
-    // Initialize map
-    function initMap(lat, lon) {
-        if (!map) {
-            map = L.map('map').setView([lat, lon], 13);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors'
-            }).addTo(map);
-            marker = L.marker([lat, lon]).addTo(map);
-        } else {
-            map.setView([lat, lon], 13);
-            marker.setLatLng([lat, lon]);
-        }
-    }
-
-    // Debounce function
-    function debounce(func, delay) {
-        return function (...args) {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => func.apply(this, args), delay);
+    // Debounce function for API calls
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
         };
     }
 
-    // Search places using Nominatim
-    async function searchPlaces(query, type = 'city') {
+    // Search places function
+    async function searchPlaces(query, type) {
         try {
             const params = new URLSearchParams({
-                q: query,
                 format: 'json',
                 addressdetails: 1,
-                limit: 5
+                limit: 5,
+                q: query
             });
 
             if (type === 'city') {
@@ -55,8 +45,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             const response = await fetch(`https://nominatim.openstreetmap.org/search?${params}`);
-            if (!response.ok) throw new Error('Failed to fetch places');
-            return await response.json();
+            const data = await response.json();
+            return data;
         } catch (error) {
             console.error('Error searching places:', error);
             return [];
@@ -64,50 +54,64 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Update suggestions list
-    function updateSuggestions(results, container, type) {
-        container.innerHTML = '';
-        container.style.display = results.length ? 'block' : 'none';
+    function updateSuggestions(suggestions, data) {
+        suggestions.innerHTML = '';
+        suggestions.style.display = data.length > 0 ? 'block' : 'none';
 
-        results.forEach(result => {
+        data.forEach(place => {
             const div = document.createElement('div');
             div.className = 'suggestion-item';
-            div.textContent = type === 'city'
-                ? `${result.address.city || result.address.town || result.address.village || result.name}, ${result.address.country}`
-                : result.display_name;
+
+            // Format the display text based on available data
+            let displayText = '';
+            if (suggestions === citySuggestions) {
+                const city = place.address?.city || place.address?.town || place.address?.village || place.name;
+                const state = place.address?.state || '';
+                const country = place.address?.country || '';
+                displayText = [city, state, country].filter(Boolean).join(', ');
+            } else {
+                displayText = place.display_name;
+            }
+
+            div.textContent = displayText;
 
             div.addEventListener('click', () => {
-                if (type === 'city') {
-                    citySearch.value = result.address.city || result.address.town || result.address.village || result.name;
-                    cityInput.value = result.address.city || result.address.town || result.address.village || result.name;
-                    countryInput.value = result.address.country;
-                    addressFields.style.display = 'grid';
-                    initMap(result.lat, result.lon);
+                if (suggestions === citySuggestions) {
+                    const city = place.address?.city || place.address?.town || place.address?.village || place.name;
+                    cityInput.value = city;
+                    countryInput.value = place.address?.country || '';
                 } else {
-                    streetSearch.value = result.display_name;
-                    streetInput.value = result.address.road || '';
-                    postcodeInput.value = result.address.postcode || '';
-                    initMap(result.lat, result.lon);
+                    streetInput.value = place.address?.road || place.display_name.split(',')[0];
+                    streetNumberInput.value = place.address?.house_number || '';
+                    postcodeInput.value = place.address?.postcode || '';
                 }
-                container.style.display = 'none';
+                suggestions.style.display = 'none';
             });
-
-            container.appendChild(div);
+            suggestions.appendChild(div);
         });
     }
 
-    // City search handler
-    citySearch.addEventListener('input', debounce(async (e) => {
-        if (e.target.value.length < 3) return;
-        const results = await searchPlaces(e.target.value, 'city');
-        updateSuggestions(results, citySuggestions, 'city');
+    // Event listeners for city and street search
+    cityInput.addEventListener('input', debounce(async (e) => {
+        const query = e.target.value;
+        if (query.length >= 2) {
+            const data = await searchPlaces(query, 'city');
+            updateSuggestions(citySuggestions, data);
+        } else {
+            citySuggestions.style.display = 'none';
+        }
     }, 300));
 
-    // Street search handler
-    streetSearch.addEventListener('input', debounce(async (e) => {
-        if (e.target.value.length < 3) return;
-        const cityName = cityInput.value;
-        const results = await searchPlaces(`${e.target.value}, ${cityName}`, 'street');
-        updateSuggestions(results, streetSuggestions, 'street');
+    streetInput.addEventListener('input', debounce(async (e) => {
+        const query = e.target.value;
+        if (query.length >= 2) {
+            const cityName = cityInput.value;
+            const searchQuery = cityName ? `${query}, ${cityName}` : query;
+            const data = await searchPlaces(searchQuery, 'street');
+            updateSuggestions(streetSuggestions, data);
+        } else {
+            streetSuggestions.style.display = 'none';
+        }
     }, 300));
 
     // Close suggestions on click outside
@@ -252,7 +256,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.head.appendChild(style);
     }
 
-    // Form submission handler with loading state
+    // Form submission handler
     signupForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -268,15 +272,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             password: document.getElementById('password').value,
             country_code: countryCodeSelect.value,
             number: document.getElementById('number').value,
-            address: streetInput.value ? `${streetInput.value}, ${cityInput.value}, ${countryInput.value}` : '',
+            address: streetInput.value ? `${streetInput.value} ${streetNumberInput.value}, ${cityInput.value}, ${countryInput.value}` : '',
             postcode: postcodeInput.value,
             interestedBooks: Array.from(document.querySelectorAll('input[name="interestedBooks"]:checked'))
                 .map(cb => cb.value)
         };
 
-        // Check for missing fields
+        // Check for missing fields (excluding interestedBooks)
         const missingFields = Object.entries(requiredFields)
-            .filter(([key, value]) => !value || (Array.isArray(value) && value.length === 0))
+            .filter(([key, value]) => key !== 'interestedBooks' && (!value || (Array.isArray(value) && value.length === 0)))
             .map(([key]) => key);
 
         if (missingFields.length > 0) {
@@ -289,44 +293,38 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             const response = await fetch('/api/signup', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify(requiredFields)
             });
 
             const data = await response.json();
 
             if (data.ReturnCode === 200) {
-                const emailCallModal = new bootstrap.Modal(document.getElementById('emailCall'));
-                emailCallModal.show();
-
-                // Add event listener for modal close and redirect
-                document.getElementById('emailCall').addEventListener('hidden.bs.modal', function () {
-                    window.location.href = '/login';
-                });
-
-                // Automatically redirect after 3 seconds
+                // Show success modal
+                const emailModal = new bootstrap.Modal(document.getElementById('emailCall'));
+                emailModal.show();
+                // Redirect to login after 3 seconds
                 setTimeout(() => {
-                    emailCallModal.hide();
                     window.location.href = '/login';
                 }, 3000);
             } else {
-                showError(data.ReturnMsg || 'Error creating account. Please try again.');
+                showError(data.ReturnMsg || 'Signup failed. Please try again.');
             }
         } catch (error) {
             console.error('Signup error:', error);
-            showError('Error creating account. Please try again.');
+            showError('An error occurred during signup. Please try again.');
         } finally {
             submitButton.disabled = false;
             if (buttonLoader) buttonLoader.style.display = 'none';
         }
     });
 
+    // Error message display function
     function showError(message) {
-        signupError.textContent = message;
-        signupError.style.display = 'block';
-        setTimeout(() => {
-            signupError.style.display = 'none';
-        }, 3000);
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
     }
 
     // Initialize country codes

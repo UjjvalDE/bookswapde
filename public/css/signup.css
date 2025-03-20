@@ -175,3 +175,50 @@
         font-size: 1rem;
     }
 }
+
+.address-fields {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.address-fields .form-group {
+    margin-bottom: 0;
+}
+
+.address-fields .form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.street-input-group {
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-start;
+}
+
+.street-input-group .search-container {
+    flex: 1;
+}
+
+.street-number {
+    width: 80px;
+}
+
+.street-number input {
+    width: 100%;
+}
+
+.map-container {
+    grid-column: 1 / -1;
+    height: 200px;
+    margin-top: 1rem;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+@media (max-width: 768px) {
+    .address-fields {
+        grid-template-columns: 1fr;
+    }
+}

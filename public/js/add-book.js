@@ -1,28 +1,21 @@
 // public/js/add-book.js
 // Preview cover image when URL is manually entered
 document.getElementById('coverImage').addEventListener('input', (e) => {
-  const coverImageUrl = e.target.value;
-  const coverPreview = document.querySelector('#coverPreview img');
-  const previewOverlay = document.querySelector('.preview-overlay');
+  const coverImageUrl = e.target.value.trim();
+  const coverPreview = document.getElementById('coverPreview');
+  const previewImg = coverPreview.querySelector('img');
 
   if (coverImageUrl) {
-    coverPreview.src = coverImageUrl;
-    coverPreview.style.display = 'block';
-    previewOverlay.style.opacity = '0';
-
-    // Add error handling for image loading
-    coverPreview.onerror = function () {
-      this.src = 'https://via.placeholder.com/300x400?text=No+Image+Available';
-      previewOverlay.style.opacity = '1';
+    previewImg.src = coverImageUrl;
+    previewImg.onload = function () {
+      coverPreview.style.display = 'block';
     };
-
-    coverPreview.onload = function () {
-      previewOverlay.style.opacity = '0';
+    previewImg.onerror = function () {
+      coverPreview.style.display = 'none';
     };
   } else {
-    coverPreview.src = '';
     coverPreview.style.display = 'none';
-    previewOverlay.style.opacity = '1';
+    previewImg.src = '';
   }
 });
 
@@ -35,7 +28,7 @@ document.getElementById('addBookForm').addEventListener('submit', async (e) => {
   const price = document.getElementById('price').value;
   const errorDiv = document.getElementById('addBookError');
   const successDiv = document.getElementById('addBookSuccess');
-  const coverPreview = document.querySelector('#coverPreview img');
+  const coverPreview = document.getElementById('coverPreview');
 
   const token = localStorage.getItem('token');
 
@@ -52,7 +45,13 @@ document.getElementById('addBookForm').addEventListener('submit', async (e) => {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify({ bookName, coverImage, description, bookType, price })
+      body: JSON.stringify({
+        bookName,
+        coverImage,
+        description,
+        bookType,
+        price: price || 0
+      })
     });
 
     const data = await response.json();
@@ -61,7 +60,6 @@ document.getElementById('addBookForm').addEventListener('submit', async (e) => {
       successDiv.style.display = 'block';
       errorDiv.style.display = 'none';
       document.getElementById('addBookForm').reset();
-      coverPreview.src = '';
       coverPreview.style.display = 'none';
     } else {
       errorDiv.textContent = data.message || 'Failed to add book.';
@@ -81,8 +79,14 @@ async function autofill() {
   const bookType = document.getElementById('bookType');
   const price = document.getElementById('price');
   const errorDiv = document.getElementById('addBookError');
-  const successDiv = document.getElementById('addBookSuccess');
-  const coverPreview = document.querySelector('#coverPreview img');
+  const coverPreview = document.getElementById('coverPreview');
+  const previewImg = coverPreview.querySelector('img');
+
+  if (!bookName.trim()) {
+    errorDiv.textContent = 'Please enter a book name first.';
+    errorDiv.style.display = 'block';
+    return;
+  }
 
   try {
     const response = await fetch(
@@ -107,19 +111,18 @@ async function autofill() {
       const category = book.categories?.[0]?.toLowerCase() || '';
       bookType.value = Object.keys(categoryMap).find(key => category.includes(key)) || '';
 
-      price.value = book.saleInfo?.listPrice?.amount || 10.00;
+      price.value = 0;
 
       // Update image preview
       if (coverImage.value) {
-        coverPreview.src = coverImage.value;
-        coverPreview.style.display = 'block';
-
-        // Add error handling for image loading
-        coverPreview.onerror = function () {
-          this.src = 'https://via.placeholder.com/300x400?text=No+Image+Available';
+        previewImg.src = coverImage.value;
+        previewImg.onload = function () {
+          coverPreview.style.display = 'block';
+        };
+        previewImg.onerror = function () {
+          coverPreview.style.display = 'none';
         };
       } else {
-        coverPreview.src = '';
         coverPreview.style.display = 'none';
       }
 
@@ -134,3 +137,84 @@ async function autofill() {
     console.error('Google Books API error:', err);
   }
 }
+
+// Image upload handling
+document.getElementById('uploadImageBtn').addEventListener('click', () => {
+  document.getElementById('imageUpload').click();
+});
+
+document.getElementById('imageUpload').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  // Validate file type
+  if (!file.type.startsWith('image/')) {
+    const errorDiv = document.getElementById('addBookError');
+    errorDiv.textContent = 'Please select an image file.';
+    errorDiv.style.display = 'block';
+    return;
+  }
+
+  // Show loading state
+  const uploadBtn = document.getElementById('uploadImageBtn');
+  const originalBtnText = uploadBtn.innerHTML;
+  uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+  uploadBtn.disabled = true;
+
+  try {
+    // Get upload URL from server
+    const token = localStorage.getItem('token');
+    const urlResponse = await fetch('/api/upload', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        fileName: file.name,
+        fileType: file.type
+      })
+    });
+
+    if (!urlResponse.ok) {
+      throw new Error('Failed to get upload URL');
+    }
+
+    const { uploadUrl, fileUrl } = await urlResponse.json();
+
+    // Upload file to S3
+    await fetch(uploadUrl, {
+      method: 'PUT',
+      body: file,
+      headers: {
+        'Content-Type': file.type
+      }
+    });
+
+    // Update cover image URL input and preview
+    const coverImage = document.getElementById('coverImage');
+    coverImage.value = fileUrl;
+
+    // Trigger the preview update
+    const previewEvent = new Event('input', { bubbles: true });
+    coverImage.dispatchEvent(previewEvent);
+
+    // Reset upload button
+    uploadBtn.innerHTML = originalBtnText;
+    uploadBtn.disabled = false;
+
+    // Hide any error messages
+    const errorDiv = document.getElementById('addBookError');
+    errorDiv.style.display = 'none';
+
+  } catch (error) {
+    console.error('Upload error:', error);
+    const errorDiv = document.getElementById('addBookError');
+    errorDiv.textContent = 'Failed to upload image. Please try again.';
+    errorDiv.style.display = 'block';
+
+    // Reset upload button
+    uploadBtn.innerHTML = originalBtnText;
+    uploadBtn.disabled = false;
+  }
+});

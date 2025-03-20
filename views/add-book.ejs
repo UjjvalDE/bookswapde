@@ -38,12 +38,21 @@
               <div class="input-wrapper">
                 <label for="coverImage" class="form-label">
                   <i class="fas fa-image"></i>
-                  Cover Image URL
+                  Cover Image
                 </label>
-                <input type="text" class="form-control" id="coverImage" name="coverImage"
-                  placeholder="Enter image URL (e.g., https://example.com/cover.jpg)">
+                <div class="image-input-group">
+                  <input type="text" class="form-control" id="coverImage" name="coverImage"
+                    placeholder="Enter image URL (e.g., https://example.com/cover.jpg)">
+                  <div class="upload-btn-wrapper">
+                    <button type="button" class="btn btn-secondary" id="uploadImageBtn">
+                      <i class="fas fa-upload"></i>
+                      Upload Image
+                    </button>
+                    <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+                  </div>
+                </div>
               </div>
-              <div class="image-preview" id="coverPreview">
+              <div class="image-preview" id="coverPreview" style="display: none;">
                 <img src="" alt="Cover Preview">
                 <div class="preview-overlay">
                   <i class="fas fa-book"></i>
@@ -344,6 +353,41 @@
         width: 100%;
         justify-content: center;
       }
+    }
+
+    .image-input-group {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+
+    .image-input-group .form-control {
+      flex: 1;
+    }
+
+    .upload-btn-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+
+    .upload-btn-wrapper input[type=file] {
+      display: none;
+    }
+
+    #uploadImageBtn {
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .loading-spinner {
+      display: none;
+      margin-left: 0.5rem;
+    }
+
+    .loading-spinner.show {
+      display: inline-block;
     }
   </style>
 

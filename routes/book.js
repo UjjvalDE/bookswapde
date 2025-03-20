@@ -237,6 +237,37 @@ module.exports = {
                     res.status(respData.ReturnCode).send(respData);
                 }
             });
+        app.post('/api/upload',
+            header('authorization').not().isEmpty().trim(),
+            async (req, res) => {
+                try {
+                    // Finds the validation errors in this request and wraps them in an object with handy functions
+                    const errors = validationResult(req);
+
+                    if (!errors.isEmpty()) {
+                        var respData = commonController.errorValidationResponse(errors);
+                        res.status(respData.ReturnCode).send(respData);
+                    } else {
+                        apiJwtController.DECODE(req, async function (userData) {
+                            if (userData.ReturnCode != 200) {
+                                res.status(userData.ReturnCode).send(userData);
+                            } else {
+                                var sendData = {
+                                    userData: userData,
+                                    fileName: req.body.fileName,
+                                    fileType: req.body.fileType
+                                }
+                                bookApiController.GETUPLOADURL(sendData, function (respData) {
+                                    res.status(respData.ReturnCode).send(respData);
+                                });
+                            }
+                        });
+                    }
+                } catch (err) {
+                    var respData = commonController.errorValidationResponse(err);
+                    res.status(respData.ReturnCode).send(respData);
+                }
+            });
     },
 
 }

@@ -67,7 +67,8 @@ module.exports = {
                 postcode: data.postcode,
                 created_at: new Date(),
                 temp: false,
-                profile_img: data.profileImage || "cat"
+                profile_img: data.profileImage || "cat",
+                interestedBooks: data.interestedBooks || []
             };
 
             let user;
