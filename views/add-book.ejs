@@ -79,12 +79,18 @@
                 </label>
                 <select class="form-select" id="bookType" name="bookType" required>
                   <option value="" disabled selected>Select book type</option>
-                  <option value="horror">Horror</option>
+                  <option value="fiction">Fiction</option>
                   <option value="mystery">Mystery</option>
-                  <option value="thriller">Thriller</option>
-                  <option value="fantasy">Fantasy</option>
                   <option value="sci-fi">Sci-Fi</option>
+                  <option value="fantasy">Fantasy</option>
+                  <option value="non-fiction">Non-Fiction</option>
+                  <option value="biography">Biography</option>
                   <option value="romance">Romance</option>
+                  <option value="thriller">Thriller</option>
+                  <option value="horror">Horror</option>
+                  <option value="poetry">Poetry</option>
+                  <option value="history">History</option>
+                  <option value="science">Science</option>
                 </select>
               </div>
             </div>
@@ -379,15 +385,6 @@
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-    }
-
-    .loading-spinner {
-      display: none;
-      margin-left: 0.5rem;
-    }
-
-    .loading-spinner.show {
-      display: inline-block;
     }
   </style>
 

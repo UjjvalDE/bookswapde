@@ -465,7 +465,7 @@ module.exports = {
             email_verify: true
         };
         var usersData = await userModal.find(condition);
-        console.log("data >>", usersData);
+
         if (usersData.length > 0) {
             usersData = usersData[0]
             const email = usersData.email
@@ -494,10 +494,10 @@ module.exports = {
             sendData['ReturnMsg'] = `Send email to ${email}`
             callback(sendData)
         } else {
-            sendData['ReturnCode'] = 200;
+            sendData['ReturnCode'] = 400;
             sendData['err'] = 1;
             sendData['Data'] = [];
-            sendData['ReturnMsg'] = "Email not found"
+            sendData['ReturnMsg'] = "Email not found or email not confirm by you"
             callback(sendData)
         }
     },

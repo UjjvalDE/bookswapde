@@ -58,22 +58,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
     return;
   }
+
+  // If logged in, initialize the page
   const myBooksContainer = document.getElementById('myBooksContainer');
   const errorDiv = document.getElementById('myBooksError');
   const searchInput = document.getElementById('searchInput');
   const typeFilter = document.getElementById('typeFilter');
   const priceFilter = document.getElementById('priceFilter');
   const applyFiltersBtn = document.getElementById('applyFilters');
+  const clearFiltersBtn = document.getElementById('clearFilters');
 
-  const fetchMyBooks = async (filters = {}) => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        window.location.href = '/login';
-        return;
+  async function fetchBooks(filters = {}) {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      if (errorDiv) {
+        errorDiv.textContent = 'You must be logged in to view books.';
+        errorDiv.style.display = 'block';
       }
+      window.location.href = '/login';
+      return;
+    }
 
-      const queryParams = new URLSearchParams(filters).toString();
+    try {
+      // Construct the price filter in the format the backend expects (e.g., "0-5", "0-0", "15+")
+      let priceValue = filters.price || '';
+
+      const queryParams = new URLSearchParams({
+        search: filters.search || '',
+        type: filters.type || '',
+        price: priceValue // Send the price as a single string (e.g., "0-5", "0-0", "15+")
+      }).toString();
+
+      console.log('Fetching books with query:', queryParams); // Debug log
+
       const response = await fetch(`/api/allBook?${queryParams}`, {
         method: 'GET',
         headers: {
@@ -85,31 +102,25 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await response.json();
 
       if (response.ok && data.ReturnCode === 200 && Array.isArray(data.Data)) {
-        myBooksContainer.innerHTML = '';
-        if (data.Data.length === 0) {
-          myBooksContainer.innerHTML = '<p class="text-center">No books found.</p>';
+        // Filter out unavailable books
+        const availableBooks = data.Data.filter(book => book.available);
+
+        if (availableBooks.length === 0) {
+          myBooksContainer.innerHTML = `
+            <div class="no-books-message">
+              <i class="fas fa-book"></i>
+              <p>No available books found</p>
+            </div>
+          `;
         } else {
-          data.Data.forEach(book => {
-            const bookCard = `
-              <div class="col">
-                <a href="/book/${book._id}" class="text-decoration-none">
-                  <div class="card h-100 shadow-lg">
-                    <img src="${book.coverImage || 'https://via.placeholder.com/150'}" class="card-img-top" alt="${book.bookName}">
-                    <div class="card-body text-center">
-                      <h5 class="card-title">${book.bookName}</h5>
-                      <p class="card-text">€${book.price.toFixed(2)}</p>
-                    </div>
-                  </div>
-                </a>
-              </div>
-            `;
-            myBooksContainer.innerHTML += bookCard;
-          });
+          myBooksContainer.innerHTML = availableBooks.map(book => createBookCard(book)).join('');
         }
-        errorDiv.style.display = 'none';
+        if (errorDiv) errorDiv.style.display = 'none';
       } else {
-        errorDiv.textContent = data.ReturnMsg || 'Failed to load books.';
-        errorDiv.style.display = 'block';
+        if (errorDiv) {
+          errorDiv.textContent = data.ReturnMsg || 'Failed to load books.';
+          errorDiv.style.display = 'block';
+        }
         // If token is expired, redirect to login
         if (data.ReturnCode === 401) {
           localStorage.removeItem('token');
@@ -117,14 +128,36 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
     } catch (err) {
-      errorDiv.textContent = 'Error loading books.';
-      errorDiv.style.display = 'block';
-      console.error('MyBooks fetch error:', err);
+      console.error('Error loading books:', err);
+      if (errorDiv) {
+        errorDiv.textContent = 'Error loading books.';
+        errorDiv.style.display = 'block';
+      }
     }
-  };
+  }
+
+  function createBookCard(book) {
+    return `
+      <a href="/book/${book._id}" class="book-card">
+        <img src="${book.coverImage || 'https://via.placeholder.com/300x400?text=No+Image'}" 
+          alt="${book.bookName}" 
+          class="book-image"
+          onerror="this.src='https://via.placeholder.com/300x400?text=No+Image'">
+        <div class="book-info">
+          <div>
+            <h3 class="book-title">${book.bookName}</h3>
+            <div class="book-details">
+              <span class="book-tag">${book.bookType}</span>
+              <span class="book-price">${book.price === 0 ? 'Free' : `€${book.price.toFixed(2)}`}</span>
+            </div>
+          </div>
+        </div>
+      </a>
+    `;
+  }
 
   // Load books when the page loads
-  fetchMyBooks();
+  fetchBooks();
 
   // Apply filters when the button is clicked
   applyFiltersBtn.addEventListener('click', () => {
@@ -133,89 +166,25 @@ document.addEventListener('DOMContentLoaded', () => {
       type: typeFilter.value,
       price: priceFilter.value
     };
-    fetchMyBooks(filters);
+    fetchBooks(filters);
   });
-});
 
-async function fetchBooks() {
-  const token = localStorage.getItem('token');
-  const errorDiv = document.getElementById('myBooksError');
-  const booksContainer = document.getElementById('myBooksContainer');
+  // Clear filters and fetch all books when the button is clicked
+  if (clearFiltersBtn) {
+    clearFiltersBtn.addEventListener('click', () => {
+      // Reset all filter inputs
+      searchInput.value = ''; // Clear the search input field
+      typeFilter.value = '';  // Reset the type filter dropdown
+      priceFilter.value = ''; // Reset the price filter dropdown
 
-  if (!token) {
-    if (errorDiv) {
-      errorDiv.textContent = 'You must be logged in to view books.';
-      errorDiv.style.display = 'block';
-    }
-    return;
-  }
+      console.log('Filters cleared:', {
+        search: searchInput.value,
+        type: typeFilter.value,
+        price: priceFilter.value
+      }); // Debug log
 
-  try {
-    const response = await fetch('/api/allBook', {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json'
-      }
+      // Fetch all books with no filters
+      fetchBooks({});
     });
-
-    const data = await response.json();
-
-    if (response.ok && data.ReturnCode === 200 && Array.isArray(data.Data)) {
-      if (booksContainer) {
-        // Filter out unavailable books
-        const availableBooks = data.Data.filter(book => book.available);
-
-        if (availableBooks.length === 0) {
-          booksContainer.innerHTML = `
-            <div class="no-books-message">
-              <i class="fas fa-book"></i>
-              <p>No available books found</p>
-            </div>
-          `;
-        } else {
-          booksContainer.innerHTML = availableBooks.map(book => createBookCard(book)).join('');
-        }
-      }
-      if (errorDiv) errorDiv.style.display = 'none';
-    } else {
-      if (errorDiv) {
-        errorDiv.textContent = data.ReturnMsg || 'Failed to load books.';
-        errorDiv.style.display = 'block';
-      }
-      // If token is expired, redirect to login
-      if (data.ReturnCode === 401) {
-        localStorage.removeItem('token');
-        window.location.href = '/login';
-      }
-    }
-  } catch (err) {
-    console.error('Error loading books:', err);
-    if (errorDiv) {
-      errorDiv.textContent = 'Error loading books.';
-      errorDiv.style.display = 'block';
-    }
   }
-}
-
-function createBookCard(book) {
-  return `
-    <div class="book-card">
-      <img src="${book.coverImage || 'https://via.placeholder.com/300x400?text=No+Image'}" 
-        alt="${book.bookName}" 
-        class="book-image"
-        onerror="this.src='https://via.placeholder.com/300x400?text=No+Image'">
-      <div class="book-overlay">
-        <h3 class="book-title">${book.bookName}</h3>
-        <div class="book-details">
-          <span class="book-tag">${book.bookType}</span>
-          <span class="book-tag">€${book.price}</span>
-        </div>
-        <a href="/book/${book._id}" class="btn btn-primary">View Details</a>
-      </div>
-    </div>
-  `;
-}
-
-// Call fetchBooks when the page loads
-document.addEventListener('DOMContentLoaded', fetchBooks);
+});

@@ -1,5 +1,6 @@
 const { body, header, param, query, validationResult } = require('express-validator');
-
+const { parsePhoneNumberFromString } = require('libphonenumber-js');
+const VERIFY_EMAIL_API_KEY = process.env.VERIFY_EMAIL_API_KEY;
 module.exports = {
     BindUrl: function () {
         app.post('/api/signup',
@@ -8,6 +9,8 @@ module.exports = {
             body('password').isLength({ min: 5 }).withMessage('Password not allowed'), //password validation
             async (req, res) => {
                 try {
+                    const fullPhoneNumber = `${req.body.country_code}${req.body.number}`;
+                    const phoneNumber = parsePhoneNumberFromString(fullPhoneNumber);
                     // Finds the validation errors in this request and wraps them in an object with handy functions
                     const errors = validationResult(req);
                     if (!errors.isEmpty()) {
@@ -16,7 +19,18 @@ module.exports = {
                     } else if (!validator.validate(req.body.email)) {
                         var respData = commonController.errorValidationResponse(errors);
                         res.status(respData.ReturnCode).send(respData);
-                    } else {
+
+                    } else if (!phoneNumber.isPossible() || !phoneNumber.isValid()) {
+
+                        return res.status(400).json({
+                            ReturnCode: 400,
+                            ReturnMsg: 'Invalid phone number for the selected country'
+                        });
+
+                    }
+                    else {
+
+
                         //calling controller function
                         var data = await req.body;
 
@@ -24,7 +38,10 @@ module.exports = {
                         userApiController.signup(data, function (respData) {
                             res.status(respData.ReturnCode).send(respData);
                         });
+
+
                     }
+
                 } catch (err) {
                     var respData = commonController.errorValidationResponse(err);
                     res.status(respData.ReturnCode).send(respData);
@@ -47,7 +64,16 @@ module.exports = {
 
 
                         userApiController.VERIFY_REGISTER_ACCOUNT(data, function (respData) {
-                            res.render("confirmation", { pageTitle: 'confirmation email', respData: respData });
+
+
+                            if (!respData.err) {
+                                console.log('respData', respData);
+                                res.render("confirmation", { pageTitle: 'confirmation email', respData: respData });
+                            } else {
+                                console.log(respData);
+                                res.render("already-confirmed", { pageTitle: 'confirmation email', respData: respData });
+                            }
+
 
                         });
                     }

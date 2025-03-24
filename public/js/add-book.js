@@ -15,7 +15,7 @@ document.getElementById('coverImage').addEventListener('input', (e) => {
     };
   } else {
     coverPreview.style.display = 'none';
-    previewImg.src = '';
+    previewImg.src = ''; // Clear the src to prevent invalid requests
   }
 });
 
@@ -61,8 +61,11 @@ document.getElementById('addBookForm').addEventListener('submit', async (e) => {
       errorDiv.style.display = 'none';
       document.getElementById('addBookForm').reset();
       coverPreview.style.display = 'none';
+      setTimeout(() => {
+        window.location.href = '/myBook';
+      }, 1000);
     } else {
-      errorDiv.textContent = data.message || 'Failed to add book.';
+      errorDiv.textContent = data.ReturnMsg || 'Failed to add book.';
       errorDiv.style.display = 'block';
     }
   } catch (err) {
@@ -101,19 +104,24 @@ async function autofill() {
       description.value = book.description || '';
 
       const categoryMap = {
-        'fantasy': 'fantasy',
-        'science fiction': 'sci-fi',
-        'mystery': 'mystery',
-        'thriller': 'thriller',
-        'horror': 'horror',
-        'romance': 'romance'
+        "fiction": "fiction",
+        "mystery": "mystery",
+        "sci-fi": "sci-fi",
+        "fantasy": "fantasy",
+        "non-fiction": "non-fiction",
+        "biography": "biography",
+        "romance": "romance",
+        "thriller": "thriller",
+        "horror": "horror",
+        "poetry": "poetry",
+        "history": "history",
+        "science": "science"
       };
       const category = book.categories?.[0]?.toLowerCase() || '';
       bookType.value = Object.keys(categoryMap).find(key => category.includes(key)) || '';
 
       price.value = 0;
 
-      // Update image preview
       if (coverImage.value) {
         previewImg.src = coverImage.value;
         previewImg.onload = function () {
@@ -162,38 +170,38 @@ document.getElementById('imageUpload').addEventListener('change', async (e) => {
   uploadBtn.disabled = true;
 
   try {
-    // Get upload URL from server
+    // Get token for authorization
     const token = localStorage.getItem('token');
-    const urlResponse = await fetch('/api/upload', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        fileName: file.name,
-        fileType: file.type
-      })
-    });
-
-    if (!urlResponse.ok) {
-      throw new Error('Failed to get upload URL');
+    if (!token) {
+      throw new Error('You must be logged in to upload an image.');
     }
 
-    const { uploadUrl, fileUrl } = await urlResponse.json();
+    // Create FormData to send the file
+    const formData = new FormData();
+    formData.append('file', file);
 
-    // Upload file to S3
-    await fetch(uploadUrl, {
-      method: 'PUT',
-      body: file,
+    // Upload file to /upload-file API
+    const uploadResponse = await fetch('/upload-file', {
+      method: 'POST',
       headers: {
-        'Content-Type': file.type
-      }
+        'Authorization': `Bearer ${token}`
+      },
+      body: formData
     });
 
-    // Update cover image URL input and preview
+    const uploadData = await uploadResponse.json();
+    if (!uploadResponse.ok) {
+      throw new Error(uploadData.ReturnMsg || 'Failed to upload image to server');
+    }
+
+    // Ensure the file URL exists in the response
+    if (!uploadData.Data || !uploadData.Data.fileUrl) {
+      throw new Error('File URL not found in server response');
+    }
+
+    // Update cover image URL input and preview with the returned file URL
     const coverImage = document.getElementById('coverImage');
-    coverImage.value = fileUrl;
+    coverImage.value = uploadData.Data.fileUrl; // Correctly access the file URL
 
     // Trigger the preview update
     const previewEvent = new Event('input', { bubbles: true });
@@ -206,11 +214,16 @@ document.getElementById('imageUpload').addEventListener('change', async (e) => {
     // Hide any error messages
     const errorDiv = document.getElementById('addBookError');
     errorDiv.style.display = 'none';
-
   } catch (error) {
     console.error('Upload error:', error);
     const errorDiv = document.getElementById('addBookError');
-    errorDiv.textContent = 'Failed to upload image. Please try again.';
+    let errorMessage = 'Failed to upload image. Please try again.';
+    if (error.message.includes('network')) {
+      errorMessage = 'Network error: Please check your internet connection and try again.';
+    } else if (error.message.includes('File URL not found')) {
+      errorMessage = 'Upload failed: Server did not return a valid file URL.';
+    }
+    errorDiv.textContent = errorMessage;
     errorDiv.style.display = 'block';
 
     // Reset upload button

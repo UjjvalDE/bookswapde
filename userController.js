@@ -161,7 +161,7 @@ module.exports = {
         try {
             const decoded = jwt.verify(token, process.env.SECRET_KEY);
             if (!decoded) {
-                sendData['ReturnCode'] = 200;
+                sendData['ReturnCode'] = 400;
                 sendData['err'] = 1;
                 sendData['Data'] = [];
                 sendData['ReturnMsg'] = "Your token is not valid";
@@ -180,7 +180,7 @@ module.exports = {
 
                     usersData = usersData[0]
                     if (usersData.email_verify == true) {
-                        sendData['ReturnCode'] = 200;
+                        sendData['ReturnCode'] = 201;
                         sendData['err'] = 1;
                         sendData['Data'] = [];
                         sendData['ReturnMsg'] = 'already verify';
@@ -246,21 +246,21 @@ module.exports = {
                         // callback(sendData);
                     }
                 } else {
-                    sendData['ReturnCode'] = 200;
+                    sendData['ReturnCode'] = 400;
                     sendData['err'] = 1;
                     sendData['Data'] = [];
                     sendData['ReturnMsg'] = "Something went to wrong";
                     callback(sendData);
                 }
             } else {
-                sendData['ReturnCode'] = 200;
+                sendData['ReturnCode'] = 400;
                 sendData['err'] = 1;
                 sendData['Data'] = [];
                 sendData['ReturnMsg'] = "Something went to wrong";
                 callback(sendData);
             }
         } catch (err) {
-            sendData['ReturnCode'] = 200;
+            sendData['ReturnCode'] = 400;
             sendData['err'] = 1;
             sendData['Data'] = [];
             sendData['ReturnMsg'] = err;
@@ -462,7 +462,7 @@ module.exports = {
             email_verify: true
         };
         var usersData = await userModal.find(condition);
-        console.log("data >>", usersData);
+
         if (usersData.length > 0) {
             usersData = usersData[0]
             const email = usersData.email
@@ -491,10 +491,10 @@ module.exports = {
             sendData['ReturnMsg'] = `Send email to ${email}`
             callback(sendData)
         } else {
-            sendData['ReturnCode'] = 200;
+            sendData['ReturnCode'] = 400;
             sendData['err'] = 1;
             sendData['Data'] = [];
-            sendData['ReturnMsg'] = "Email not found"
+            sendData['ReturnMsg'] = "Email not found or you not confirm your account."
             callback(sendData)
         }
     },

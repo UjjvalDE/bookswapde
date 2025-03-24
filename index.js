@@ -18,10 +18,18 @@ pagination = module.exports = require('pagination');
 validator = module.exports = require("email-validator");
 nodemailer = module.exports = require('nodemailer');
 ejs = module.exports = require('ejs');
-moment = module.exports = require('moment')
-
+//fetch = module.exports = require('node-fetch');
+moment = module.exports = require('moment');
+parsePhoneNumberFromString = module.exports = require('libphonenumber-js');
 schedule = module.exports = require('node-schedule');
+AWS = module.exports = require('aws-sdk');
 
+
+s3 = module.exports = new AWS.S3({
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID, // Set in your environment variables
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY, // Set in your environment variables
+    region: process.env.AWS_REGION // e.g., 'us-east-1'
+});
 require('dotenv').config();
 
 // Initialize Express App
@@ -33,6 +41,12 @@ app.use(cors());
 
 // Configure Mongoose
 mongoose.set('strictQuery', false);
+
+
+
+// Multer configuration to handle file uploads
+storage = module.exports = multer.memoryStorage(); // Store file in memory
+upload = module.exports = multer({ storage: storage });
 
 // Database Connection
 mongoose.connect(process.env.MONGO_URI, {

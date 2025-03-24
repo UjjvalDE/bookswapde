@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       // Check if user is admin/owner
       const isAdmin = myBook.admin === true;
-      console.log('Is Admin:', isAdmin);
+
 
       if (isAdmin) {
         // User is the owner - show edit/delete buttons

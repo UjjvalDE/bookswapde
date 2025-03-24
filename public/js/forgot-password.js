@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await response.json();
 
-            if (response.ok) {
+            if (data.ReturnCode === 200) {
                 // Show success notification
                 const notification = document.createElement('div');
                 notification.className = 'auth-popup show';
@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, 3000);
 
             } else {
-                errorDiv.textContent = data.message || 'Failed to send reset link. Please try again.';
+                errorDiv.textContent = data.ReturnMsg;
                 errorDiv.style.display = 'block';
             }
         } catch (err) {

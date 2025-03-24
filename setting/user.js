@@ -18,7 +18,11 @@ module.exports = {
         app.get('/forgot-password', async (req, res) => {
             res.render('forgot-password', { pageTitle: 'forgot-password', user: null });
         })
+        app.get('/auth/reset-password', (req, res) => {
 
+            res.render('reset-password', { pageTitle: 'forgot-password', user: null });
+
+        });
 
     }
 }

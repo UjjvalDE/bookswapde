@@ -1,4 +1,3 @@
-<!-- views/partials/header.ejs -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -271,6 +270,128 @@
       opacity: 1;
     }
 
+    /* Logout Confirmation Popup Styles */
+    .logout-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.9);
+      background: var(--white);
+      border-radius: 16px;
+      padding: 2rem;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      z-index: 2000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .logout-popup.show {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .logout-popup-content {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      text-align: center;
+    }
+
+    .logout-popup-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 50px;
+      height: 50px;
+      background: var(--primary);
+      border-radius: 50%;
+      font-size: 1.5rem;
+      color: var(--secondary);
+      margin: 0 auto;
+    }
+
+    .logout-popup-title {
+      color: var(--secondary);
+      font-weight: 700;
+      font-size: 1.25rem;
+      margin: 0;
+    }
+
+    .logout-popup-message {
+      color: var(--accent);
+      font-size: 0.95rem;
+      margin: 0;
+      opacity: 0.8;
+    }
+
+    .logout-popup-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+
+    .logout-popup-btn {
+      flex: 1;
+      padding: 0.75rem 1.5rem;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .logout-popup-btn.confirm {
+      background: var(--primary);
+      color: var(--secondary);
+      border: none;
+      box-shadow: 0 4px 12px rgba(238, 212, 126, 0.3);
+    }
+
+    .logout-popup-btn.cancel {
+      background: var(--light);
+      color: var(--secondary);
+      border: 2px solid var(--accent);
+    }
+
+    .logout-popup-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .logout-popup-btn.confirm:hover {
+      background: var(--gradient);
+      box-shadow: 0 6px 20px rgba(238, 212, 126, 0.4);
+    }
+
+    .logout-popup-btn.cancel:hover {
+      background: var(--accent);
+      color: var(--white);
+      border-color: var(--accent);
+    }
+
+    /* Overlay for Popup */
+    .popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .popup-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
     @media (max-width: 768px) {
       .auth-popup {
         top: auto;
@@ -279,6 +400,24 @@
         left: 1rem;
         max-width: none;
         margin: 0 auto;
+      }
+
+      .logout-popup {
+        width: 95%;
+        padding: 1.5rem;
+      }
+
+      .logout-popup-title {
+        font-size: 1.1rem;
+      }
+
+      .logout-popup-message {
+        font-size: 0.9rem;
+      }
+
+      .logout-popup-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
       }
     }
 
@@ -349,6 +488,22 @@
     </div>
   </div>
 
+  <!-- Logout Confirmation Popup -->
+  <div class="popup-overlay" id="logoutPopupOverlay"></div>
+  <div class="logout-popup" id="logoutPopup">
+    <div class="logout-popup-content">
+      <div class="logout-popup-icon">
+        <i class="fas fa-sign-out-alt"></i>
+      </div>
+      <h3 class="logout-popup-title">Confirm Logout</h3>
+      <p class="logout-popup-message">Are you sure you want to log out of your Book Swap account?</p>
+      <div class="logout-popup-buttons">
+        <button class="logout-popup-btn confirm" id="confirmLogout">Yes, I Confirm</button>
+        <button class="logout-popup-btn cancel" id="cancelLogout">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <div class="content-wrapper">
     <script>
       document.addEventListener("DOMContentLoaded", function () {
@@ -356,6 +511,10 @@
         const token = localStorage.getItem("token");
         const authPopup = document.getElementById("authPopup");
         const closeAuthPopup = document.getElementById("closeAuthPopup");
+        const logoutPopup = document.getElementById("logoutPopup");
+        const logoutPopupOverlay = document.getElementById("logoutPopupOverlay");
+        const confirmLogout = document.getElementById("confirmLogout");
+        const cancelLogout = document.getElementById("cancelLogout");
         let links = `
           <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
         `;
@@ -365,7 +524,7 @@
             <li class="nav-item"><a class="nav-link" href="/add-book">Add Book</a></li>
             <li class="nav-item"><a class="nav-link" href="/myBook">My Books</a></li>
             <li class="nav-item"><a class="nav-link" href="/profile">Profile</a></li>
-            <li class="nav-item"><a class="nav-link" href="#" onclick="logout()">Logout</a></li>
+            <li class="nav-item"><a class="nav-link" href="#" id="logoutLink">Logout</a></li>
           `;
         } else {
           links += `
@@ -382,14 +541,49 @@
             authPopup.classList.add('show');
             setTimeout(() => {
               authPopup.classList.remove('show');
-            }, 3000); // Hide after 5 seconds
+            }, 3000); // Hide after 3 seconds
           }
         }
 
-        // Close popup when clicking the close button
+        // Close auth popup when clicking the close button
         if (closeAuthPopup) {
           closeAuthPopup.addEventListener('click', () => {
             authPopup.classList.remove('show');
+          });
+        }
+
+        // Show logout confirmation popup
+        const logoutLink = document.getElementById("logoutLink");
+        if (logoutLink) {
+          logoutLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            logoutPopup.classList.add('show');
+            logoutPopupOverlay.classList.add('show');
+          });
+        }
+
+        // Confirm logout
+        if (confirmLogout) {
+          confirmLogout.addEventListener('click', () => {
+            logoutPopup.classList.remove('show');
+            logoutPopupOverlay.classList.remove('show');
+            logout();
+          });
+        }
+
+        // Cancel logout
+        if (cancelLogout) {
+          cancelLogout.addEventListener('click', () => {
+            logoutPopup.classList.remove('show');
+            logoutPopupOverlay.classList.remove('show');
+          });
+        }
+
+        // Close popup when clicking the overlay
+        if (logoutPopupOverlay) {
+          logoutPopupOverlay.addEventListener('click', () => {
+            logoutPopup.classList.remove('show');
+            logoutPopupOverlay.classList.remove('show');
           });
         }
 

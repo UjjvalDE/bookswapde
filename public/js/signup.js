@@ -11,6 +11,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     const signupForm = document.getElementById('signupForm');
     const submitButton = document.querySelector('.btn-submit');
     const errorDiv = document.getElementById('signupError');
+    const emailInput = document.getElementById('email');
+    const phoneInput = document.getElementById('number');
+    const emailError = document.getElementById('emailError');
+    const phoneError = document.getElementById('phoneError');
+
+    // Use the API key from the global variable
+    const VERIFY_EMAIL_API_KEY = 'live_272f0f0a38c67609e99c';
+
+    // Check if the API key is available
+    if (!VERIFY_EMAIL_API_KEY) {
+        console.error('Verify-Email API key is not defined.');
+        showError('Email validation is currently unavailable. Please try again later.', emailError);
+        return;
+    }
 
     // Disable autofill for address fields
     [cityInput, streetInput, streetNumberInput, postcodeInput].forEach(input => {
@@ -62,7 +76,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             const div = document.createElement('div');
             div.className = 'suggestion-item';
 
-            // Format the display text based on available data
             let displayText = '';
             if (suggestions === citySuggestions) {
                 const city = place.address?.city || place.address?.town || place.address?.village || place.name;
@@ -256,7 +269,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.head.appendChild(style);
     }
 
-    // Form submission handler
+    // Phone number input formatting (allow only numbers)
+    phoneInput.addEventListener('input', function () {
+        this.value = this.value.replace(/[^0-9]/g, '');
+    });
+
+    // Form submission handler with validation
     signupForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -265,13 +283,56 @@ document.addEventListener('DOMContentLoaded', async () => {
         const buttonLoader = document.querySelector('.button-loader');
         if (buttonLoader) buttonLoader.style.display = 'block';
 
+        // Get form values
+        const email = emailInput.value;
+        const countryCode = countryCodeSelect.value;
+        const phoneNumber = phoneInput.value;
+        const fullPhoneNumber = `${countryCode}${phoneNumber}`;
+
+        // Basic client-side validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            showError('Please enter a valid email address.', emailError);
+            submitButton.disabled = false;
+            if (buttonLoader) buttonLoader.style.display = 'none';
+            return;
+        } else {
+            emailError.style.display = 'none';
+        }
+
+        if (!countryCode) {
+            showError('Please select a country code.', phoneError);
+            submitButton.disabled = false;
+            if (buttonLoader) buttonLoader.style.display = 'none';
+            return;
+        }
+
+        if (!phoneNumber) {
+            showError('Please enter a phone number.', phoneError);
+            submitButton.disabled = false;
+            if (buttonLoader) buttonLoader.style.display = 'none';
+            return;
+        }
+
+        // Basic phone number length check (to reduce unnecessary server calls)
+        if (phoneNumber.length < 5 || phoneNumber.length > 15) {
+            showError('Phone number must be between 5 and 15 digits.', phoneError);
+            submitButton.disabled = false;
+            if (buttonLoader) buttonLoader.style.display = 'none';
+            return;
+        } else {
+            phoneError.style.display = 'none';
+        }
+
+
+
         // Validate required fields
         const requiredFields = {
             name: document.getElementById('name').value,
-            email: document.getElementById('email').value,
+            email: email,
             password: document.getElementById('password').value,
-            country_code: countryCodeSelect.value,
-            number: document.getElementById('number').value,
+            country_code: countryCode,
+            number: phoneNumber,
             address: streetInput.value ? `${streetInput.value} ${streetNumberInput.value}, ${cityInput.value}, ${countryInput.value}` : '',
             postcode: postcodeInput.value,
             interestedBooks: Array.from(document.querySelectorAll('input[name="interestedBooks"]:checked'))
@@ -284,7 +345,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             .map(([key]) => key);
 
         if (missingFields.length > 0) {
-            showError(`Please fill in all required fields: ${missingFields.join(', ')}`);
+            showError(`Please fill in all required fields: ${missingFields.join(', ')}`, errorDiv);
             submitButton.disabled = false;
             if (buttonLoader) buttonLoader.style.display = 'none';
             return;
@@ -310,11 +371,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     window.location.href = '/login';
                 }, 3000);
             } else {
-                showError(data.ReturnMsg || 'Signup failed. Please try again.');
+                showError(data.ReturnMsg || 'Signup failed. Please try again.', errorDiv);
             }
         } catch (error) {
             console.error('Signup error:', error);
-            showError('An error occurred during signup. Please try again.');
+            showError('An error occurred during signup. Please try again.', errorDiv);
         } finally {
             submitButton.disabled = false;
             if (buttonLoader) buttonLoader.style.display = 'none';
@@ -322,9 +383,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // Error message display function
-    function showError(message) {
-        errorDiv.textContent = message;
-        errorDiv.style.display = 'block';
+    function showError(message, targetDiv = errorDiv) {
+        targetDiv.textContent = message;
+        targetDiv.style.display = 'block';
     }
 
     // Initialize country codes
@@ -348,7 +409,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             });
 
-            // Set Ireland as default
+            // Set Germany as default
             const germanyOption = Array.from(countryCodeSelect.options)
                 .find(option => option.textContent.includes('Germany'));
             if (germanyOption) {
@@ -357,7 +418,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         } catch (error) {
             console.error('Error fetching countries:', error);
-            showError('Error loading country data. Please try again later.');
+            showError('Error loading country data. Please try again later.', errorDiv);
         }
     }
 

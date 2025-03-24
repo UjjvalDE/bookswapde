@@ -1,0 +1,226 @@
+<%- include('partials/header', { pageTitle: 'Contact Us' , user: user }) %>
+
+    <div class="contact-page">
+        <div class="contact-header">
+            <h1>Contact Us</h1>
+            <p>We’d love to hear from you!</p>
+        </div>
+
+        <div class="contact-content">
+            <div class="contact-info">
+                <h2>Get in Touch</h2>
+                <p>Email: <a href="mailto:ujjvalvaghasiya01@gmail.com">ujjvalvaghasiya01@gmail.com</a></p>
+                <p>Phone: <a href="tel:+4915566074974">+4915566074974</a></p>
+                <p>Owner: Ujjvalkumar Vaghasiya</p>
+            </div>
+
+            <div class="contact-form">
+                <h2>Send Us a Message</h2>
+                <form id="contactForm">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" id="name" name="name" placeholder="Your name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" placeholder="Your email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message</label>
+                        <textarea id="message" name="message" placeholder="Your message" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="btn-submit">Send Message</button>
+                </form>
+                <div id="contactError" class="error-message" style="display: none;"></div>
+                <div id="contactSuccess" class="success-message" style="display: none;">Thank you for your message!
+                    We’ll get back to you soon.</div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .contact-page {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .contact-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .contact-header h1 {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .contact-header p {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .contact-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+        }
+
+        .contact-info h2 {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+
+        .contact-info p {
+            margin-bottom: 0.5rem;
+            line-height: 1.8;
+        }
+
+        .contact-info a {
+            color: #e6b53f;
+            text-decoration: none;
+        }
+
+        .contact-info a:hover {
+            text-decoration: underline;
+        }
+
+        .contact-form h2 {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: #e6b53f;
+            box-shadow: 0 0 0 3px rgba(230, 181, 63, 0.1);
+            outline: none;
+        }
+
+        .btn-submit {
+            padding: 1rem 2rem;
+            background: #e6b53f;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit:hover {
+            background: #d4a531;
+            transform: translateY(-1px);
+        }
+
+        .error-message {
+            margin-top: 1rem;
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            padding: 1rem;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .success-message {
+            margin-top: 1rem;
+            background: #e6ffed;
+            border: 1px solid #c3f0d0;
+            color: #2e7d32;
+            padding: 1rem;
+            border-radius: 8px;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .contact-page {
+                padding: 2rem 1rem;
+            }
+
+            .contact-header h1 {
+                font-size: 2rem;
+            }
+
+            .contact-content {
+                grid-template-columns: 1fr;
+            }
+
+            .contact-info h2,
+            .contact-form h2 {
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const contactForm = document.getElementById('contactForm');
+            const contactError = document.getElementById('contactError');
+            const contactSuccess = document.getElementById('contactSuccess');
+
+            contactForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const name = document.getElementById('name').value;
+                const email = document.getElementById('email').value;
+                const message = document.getElementById('message').value;
+
+                try {
+                    const response = await fetch('/api/contact', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ name, email, message })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        contactSuccess.style.display = 'block';
+                        contactError.style.display = 'none';
+                        contactForm.reset();
+                    } else {
+                        contactError.textContent = data.message || 'An error occurred. Please try again.';
+                        contactError.style.display = 'block';
+                        contactSuccess.style.display = 'none';
+                    }
+                } catch (error) {
+                    contactError.textContent = 'An error occurred. Please try again.';
+                    contactError.style.display = 'block';
+                    contactSuccess.style.display = 'none';
+                }
+            });
+        });
+    </script>
+
+    <%- include('partials/footer') %>

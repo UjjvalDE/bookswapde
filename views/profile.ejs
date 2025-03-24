@@ -1,4 +1,3 @@
-<!-- views/profile.ejs -->
 <%- include('partials/header', { pageTitle: 'Profile' , user: user }) %>
 
     <div class="profile-container">
@@ -14,14 +13,32 @@
                 <div class="profile-grid">
                     <div class="profile-image-section">
                         <div class="profile-image-wrapper">
-                            <img id="profileImage"
-                                src="https://media-hosting.imagekit.io//0f593923344a43d6/cat.jpeg?Expires=1835982747&Key-Pair-Id=K2ZIVPTIP2VGHC&Signature=Av9Zf65AAAmAWwhKtkfpGcdsJtCwx4~rOLehcJlA9jxxiFPHaVQDNlydD7q9wrTPzHKR4GH69uaGDWw2HbpPIbuIsLTW9252rdf7oRDkE-vxclhCDT~cwy1KIdK7O2uthxb77xToUPOCHLD-pgyCmfFo~sZhjpyFno~17GV7-xYr1a~iQSkgi-SUldLOgj9DIbANwtgRnqF9ve7YyfeqOPpsyH89sFgqcAb7vbaEmvQi6a8oX9En9Fx0macHeaiuat8BJrtLfziu8Gu2gbHDU2~uaCTbyynCKrngudIlnp9AYvILbzYfPsSIjQj5pwvBa347Uf9-~JV~c3U~B75rYg__"
+                            <img id="profileImage" src="https://bookswapde.s3.eu-north-1.amazonaws.com/cat.jpeg"
                                 alt="Profile Cartoon">
-                            <div class="profile-image-overlay">
-                                <i class="fas fa-camera"></i>
-                            </div>
                         </div>
                         <p class="profile-image-caption">Cartoon by Book Swap</p>
+                        <div class="cartoon-options">
+                            <div class="cartoon-option" data-cartoon="cat">
+                                <img src="https://bookswapde.s3.eu-north-1.amazonaws.com/cat.jpeg"
+                                    alt="Playful Whiskers (Cat)" class="cartoon-image">
+                                <span>Playful Whiskers</span>
+                            </div>
+                            <div class="cartoon-option" data-cartoon="dog">
+                                <img src="https://bookswapde.s3.eu-north-1.amazonaws.com/dog.png" alt="Happy Paws (Dog)"
+                                    class="cartoon-image">
+                                <span>Happy Paws</span>
+                            </div>
+                            <div class="cartoon-option" data-cartoon="pug">
+                                <img src="https://media-hosting.imagekit.io//f896d1c965bf4921/smalldog.png?Expires=1835984672&Key-Pair-Id=K2ZIVPTIP2VGHC&Signature=R6Pia6cNw7r8w0Nc-UeNqcB86h6p6p9DIk8SSIro0JPrDNPq-Osku1NqqBKDnZblMlJIkMBfevEVzY5DqHq9He37nCoNeWhn3WlEAARk6oW8EjqfOj~hEsyXurkPv0yCWAZXSJ~FXWLr4CAL3m5QucvFnQQx5YBZzOyNYtwcnttqwtQ6Q3qMlYvF~ZJOSltgVCvDtY9LN7BZ1ctL1A3Ih4tWDCZKHek-eddbQkyVcC6j8bNTRMiG0w5iSvjzcwT8IZlMAST80jlco1NisVCDZGAYtXs1WvOySnVh8254EkEHg~vvEPi4nQ4LIv~rZN3AvZqsAEUuru53nnt88yTXrg__"
+                                    alt="Playable Pet (Pug)" class="cartoon-image">
+                                <span>Playable Pet</span>
+                            </div>
+                            <div class="cartoon-option" data-cartoon="lion">
+                                <img src="https://media-hosting.imagekit.io//fde20e130ab54445/lion.png?Expires=1835984663&Key-Pair-Id=K2ZIVPTIP2VGHC&Signature=UekN6iTrTxvZyvnaf~OBUA-A6B0dLWz767Q89JixUanD2TAyQXfmCk2GQoeU7j78VltaohGz9YC6gfco53P2k6ch0cYowPIG3F8vtpkKzBZir5nyDI7w30FyanSlTbPpmKa1GKSiCrwh-gvMqAFvDCWiXnEQ93UOShzJOlFmhKROhhuoTItSLvitzZMbwm1F2NP7yjHcNjOHW5XT4cXD0tb2zDvobRNGP15lzM6zcAG4R-zldxTrqFd25lzSsOVUe~mCXLp4-Gy8GdYOlMFFzxp3JN0WQ3IsWkM9ETAPMDwzG3o9kXv7G0i0cyXhC9lU1lf9kOZe3xnQHHT07pfwSQ__"
+                                    alt="Funny (Lion)" class="cartoon-image">
+                                <span>Funny Lion</span>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="profile-details">
@@ -43,7 +60,7 @@
                                     </div>
                                 </div>
                                 <div class="detail-item">
-                                    <i class="fas fa-map-marker-alt"></i>
+                                    <i class="fas fa-home"></i>
                                     <div class="detail-content">
                                         <span class="detail-label">Address</span>
                                         <span id="userAddress" class="detail-value">Loading...</span>
@@ -146,12 +163,13 @@
 
         .profile-image-wrapper {
             position: relative;
-            width: 250px;
-            height: 250px;
+            width: 220px;
+            height: 220px;
             margin: 0 auto 1rem;
-            border-radius: 20px;
+            border-radius: 50%;
             overflow: hidden;
             box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
         }
 
         .profile-image-wrapper img {
@@ -161,37 +179,66 @@
             transition: transform 0.3s ease;
         }
 
-        .profile-image-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .profile-image-overlay i {
-            color: var(--white);
-            font-size: 2rem;
+        .profile-image-wrapper:hover {
+            transform: translateY(-5px);
         }
 
         .profile-image-wrapper:hover img {
-            transform: scale(1.05);
-        }
-
-        .profile-image-wrapper:hover .profile-image-overlay {
-            opacity: 1;
+            transform: scale(1.1);
         }
 
         .profile-image-caption {
             color: var(--accent);
             font-size: 0.9rem;
             opacity: 0.8;
+            margin-bottom: 1rem;
+        }
+
+        .cartoon-options {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .cartoon-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            padding: 0.5rem;
+            border-radius: 10px;
+        }
+
+        .cartoon-option:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .cartoon-option.selected {
+            background: var(--light);
+            border: 2px solid var(--primary);
+        }
+
+        .cartoon-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 0.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .cartoon-option:hover .cartoon-image {
+            transform: scale(1.1);
+        }
+
+        .cartoon-option span {
+            font-size: 0.85rem;
+            color: var(--secondary);
+            text-align: center;
         }
 
         .profile-section {
@@ -224,16 +271,17 @@
 
         .detail-item {
             display: flex;
-            align-items: flex-start;
+            align-items: center;
             gap: 1rem;
             padding: 1rem;
             background: var(--light);
             border-radius: 12px;
-            transition: transform 0.3s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
         .detail-item:hover {
             transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
         .detail-item i {
@@ -278,6 +326,21 @@
             border-radius: 20px;
             font-size: 0.875rem;
             box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .interest-tag:hover {
+            transform: translateY(-2px);
+        }
+
+        .profile-view .interest-tag {
+            opacity: 0.8;
+            cursor: default;
+        }
+
+        .profile-view .interest-tag:hover {
+            transform: none;
+            box-shadow: var(--shadow);
         }
 
         .profile-actions {
@@ -298,6 +361,7 @@
             gap: 0.5rem;
             transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(238, 212, 126, 0.3);
+            text-decoration: none;
         }
 
         .btn-primary:hover {
@@ -330,12 +394,21 @@
             }
 
             .profile-image-wrapper {
-                width: 200px;
-                height: 200px;
+                width: 180px;
+                height: 180px;
             }
 
             .details-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .cartoon-options {
+                gap: 0.75rem;
+            }
+
+            .cartoon-image {
+                width: 50px;
+                height: 50px;
             }
         }
 
@@ -355,6 +428,20 @@
             .profile-header p {
                 font-size: 1rem;
             }
+
+            .profile-image-wrapper {
+                width: 150px;
+                height: 150px;
+            }
+
+            .cartoon-image {
+                width: 40px;
+                height: 40px;
+            }
+
+            .cartoon-option span {
+                font-size: 0.75rem;
+            }
         }
     </style>
 
@@ -362,7 +449,6 @@
     <script src="/js/bookCategories.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // The existing profile.js will handle populating the selected categories
             createBookCategoriesUI('interestedBooks');
         });
     </script>

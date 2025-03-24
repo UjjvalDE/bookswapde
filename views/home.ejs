@@ -1,4 +1,3 @@
-<!-- views/home.ejs -->
 <%- include('partials/header', { pageTitle: pageTitle, user: user }) %>
 
   <div class="home-container">
@@ -13,29 +12,41 @@
           <div class="search-grid">
             <div class="search-input">
               <i class="fas fa-search"></i>
-              <input type="text" id="searchInput" placeholder="Search by name or author">
+              <input type="text" id="searchInput" placeholder="Search by name or author"
+                aria-label="Search books by name or author">
             </div>
             <div class="filter-group">
-              <select id="typeFilter" class="form-select">
+              <select id="typeFilter" class="form-select" aria-label="Filter by book type">
                 <option value="">All Types</option>
-                <option value="horror">Horror</option>
+                <option value="fiction">Fiction</option>
                 <option value="mystery">Mystery</option>
-                <option value="thriller">Thriller</option>
-                <option value="fantasy">Fantasy</option>
                 <option value="sci-fi">Sci-Fi</option>
+                <option value="fantasy">Fantasy</option>
+                <option value="non-fiction">Non-Fiction</option>
+                <option value="biography">Biography</option>
                 <option value="romance">Romance</option>
+                <option value="thriller">Thriller</option>
+                <option value="horror">Horror</option>
+                <option value="poetry">Poetry</option>
+                <option value="history">History</option>
+                <option value="science">Science</option>
               </select>
-              <select id="priceFilter" class="form-select">
+              <select id="priceFilter" class="form-select" aria-label="Filter by price">
                 <option value="">All Prices</option>
-                <option value="0-10">€0 - €10</option>
-                <option value="10-20">€10 - €20</option>
-                <option value="20-50">€20 - €50</option>
-                <option value="50+">€50+</option>
+                <option value="0-0">Free Books</option>
+                <option value="0-5">€0 - €5</option>
+                <option value="5-10">€5 - €10</option>
+                <option value="10-15">€10 - €15</option>
+                <option value="15+">€15+</option>
               </select>
             </div>
-            <button id="applyFilters" class="btn btn-primary">
+            <button id="applyFilters" class="btn btn-filter" aria-label="Apply search filters">
               <i class="fas fa-filter"></i>
               <span>Apply Filters</span>
+            </button>
+            <button id="clearFilters" class="btn btn-clear" aria-label="Clear all filters">
+              <i class="fas fa-times"></i>
+              <span>Clear Filters</span>
             </button>
           </div>
         </div>
@@ -61,6 +72,10 @@
       --gradient: linear-gradient(135deg, #EED47E, #F4E5A3);
       --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
       --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      --filter-btn: #1B263B;
+      /* Deep navy for the button */
+      --filter-btn-hover: #2A3B5A;
+      /* Slightly lighter navy for hover */
     }
 
     .home-container {
@@ -110,7 +125,7 @@
 
     .search-grid {
       display: grid;
-      grid-template-columns: 1fr auto auto;
+      grid-template-columns: 1fr auto auto auto;
       gap: 1.5rem;
       align-items: center;
     }
@@ -185,20 +200,50 @@
       cursor: pointer;
     }
 
-    .btn-primary {
-      background: var(--primary);
-      color: var(--secondary);
+    .btn-filter {
+      background: var(--filter-btn);
+      color: var(--white);
+      box-shadow: 0 4px 15px rgba(27, 38, 59, 0.2);
     }
 
-    .btn-primary:hover {
-      background: var(--gradient);
+    .btn-filter:hover {
+      background: var(--filter-btn-hover);
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(238, 212, 126, 0.4);
+      box-shadow: 0 6px 20px rgba(27, 38, 59, 0.3);
+      color: var(--primary);
+    }
+
+    .btn-filter i {
+      transition: transform 0.3s ease;
+    }
+
+    .btn-filter:hover i {
+      transform: rotate(360deg);
+    }
+
+    .btn-clear {
+      background: #e2e8f0;
+      color: var(--secondary);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-clear:hover {
+      background: #cbd5e0;
+      transform: translateY(-2px);
+      color: var(--accent);
+    }
+
+    .btn-clear i {
+      transition: transform 0.3s ease;
+    }
+
+    .btn-clear:hover i {
+      transform: scale(1.2);
     }
 
     .books-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
       gap: 2rem;
       position: relative;
       z-index: 1;
@@ -211,7 +256,10 @@
       box-shadow: var(--shadow);
       transition: all 0.3s ease;
       position: relative;
-      aspect-ratio: 2/3;
+      display: flex;
+      flex-direction: column;
+      text-decoration: none;
+      color: inherit;
     }
 
     .book-card:hover {
@@ -221,7 +269,7 @@
 
     .book-image {
       width: 100%;
-      height: 100%;
+      height: 300px;
       object-fit: cover;
       transition: transform 0.3s ease;
     }
@@ -230,38 +278,45 @@
       transform: scale(1.05);
     }
 
-    .book-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.7);
+    .book-info {
+      padding: 1rem;
+      flex-grow: 1;
       display: flex;
       flex-direction: column;
-      justify-content: flex-end;
-      padding: 1.5rem;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    .book-card:hover .book-overlay {
-      opacity: 1;
-    }
-
-    .book-info {
-      color: var(--white);
+      justify-content: space-between;
     }
 
     .book-title {
       font-size: 1.1rem;
       font-weight: 600;
+      color: var(--secondary);
       margin-bottom: 0.5rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .book-details {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .book-tag {
+      font-size: 0.9rem;
+      color: var(--accent);
+      background: var(--light);
+      padding: 0.25rem 0.5rem;
+      border-radius: 10px;
     }
 
     .book-price {
       font-size: 1rem;
-      opacity: 0.9;
+      font-weight: 600;
+      color: var(--primary);
     }
 
     .alert-danger {
@@ -271,6 +326,24 @@
       padding: 1rem;
       border-radius: 12px;
       margin-bottom: 1.5rem;
+    }
+
+    .no-books-message {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 2rem;
+      color: var(--accent);
+    }
+
+    .no-books-message i {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: var(--primary);
+    }
+
+    .no-books-message p {
+      font-size: 1.1rem;
+      margin: 0;
     }
 
     @media (max-width: 992px) {
@@ -310,9 +383,21 @@
         padding: 1.5rem;
       }
 
-      .books-grid {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        gap: 1rem;
+      .book-card {
+        border-radius: 15px;
+      }
+
+      .book-image {
+        height: 250px;
+      }
+
+      .book-title {
+        font-size: 1rem;
+      }
+
+      .book-tag,
+      .book-price {
+        font-size: 0.85rem;
       }
     }
   </style>

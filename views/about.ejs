@@ -1,0 +1,113 @@
+<%- include('partials/header', { pageTitle: 'About Us' , user: user }) %>
+
+    <div class="about-page">
+        <div class="about-header">
+            <h1>About BookSwap</h1>
+            <p>Connecting Book Lovers Worldwide</p>
+        </div>
+
+        <div class="about-content">
+            <h2>Our Mission</h2>
+            <p>BookSwap was created to bring book lovers together, making it easy to share, swap, and discover books
+                within your community. We believe in the power of stories to connect people, and our platform is
+                designed to foster a love for reading while promoting sustainability through book sharing.</p>
+
+            <h2>Our Story</h2>
+            <p>Founded by Ujjvalkumar Vaghasiya, BookSwap started as a passion project to make books more accessible to
+                everyone. Ujjval, a book enthusiast himself, wanted to create a platform where people could exchange
+                books they’ve loved with others who share the same passion. Since its launch, BookSwap has grown into a
+                vibrant community of readers from around the world.</p>
+
+            <h2>Meet the Owner</h2>
+            <p><strong>Name:</strong> Ujjvalkumar Vaghasiya</p>
+            <p><strong>Email:</strong> <a href="mailto:ujjvalvaghasiya01@gmail.com">ujjvalvaghasiya01@gmail.com</a></p>
+            <p><strong>Phone:</strong> <a href="tel:+4915566074974">+4915566074974</a></p>
+            <p>Ujjval is dedicated to ensuring BookSwap remains a safe, user-friendly, and enjoyable platform for all
+                book lovers.</p>
+
+            <h2>Why Choose BookSwap?</h2>
+            <ul>
+                <li>Connect with local readers to swap books.</li>
+                <li>Discover new titles based on your preferences.</li>
+                <li>Reduce waste by sharing books instead of buying new ones.</li>
+                <li>Join a community that celebrates the joy of reading.</li>
+            </ul>
+        </div>
+    </div>
+
+    <style>
+        .about-page {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .about-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .about-header h1 {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .about-header p {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .about-content {
+            line-height: 1.8;
+            color: #333;
+        }
+
+        .about-content h2 {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .about-content p {
+            margin-bottom: 1rem;
+        }
+
+        .about-content ul {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .about-content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .about-content a {
+            color: #e6b53f;
+            text-decoration: none;
+        }
+
+        .about-content a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .about-page {
+                padding: 2rem 1rem;
+            }
+
+            .about-header h1 {
+                font-size: 2rem;
+            }
+
+            .about-content h2 {
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+
+    <%- include('partials/footer') %>

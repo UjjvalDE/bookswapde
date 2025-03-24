@@ -237,37 +237,79 @@ module.exports = {
                     res.status(respData.ReturnCode).send(respData);
                 }
             });
-        app.post('/api/upload',
-            header('authorization').not().isEmpty().trim(),
-            async (req, res) => {
-                try {
-                    // Finds the validation errors in this request and wraps them in an object with handy functions
-                    const errors = validationResult(req);
 
-                    if (!errors.isEmpty()) {
-                        var respData = commonController.errorValidationResponse(errors);
-                        res.status(respData.ReturnCode).send(respData);
-                    } else {
-                        apiJwtController.DECODE(req, async function (userData) {
-                            if (userData.ReturnCode != 200) {
-                                res.status(userData.ReturnCode).send(userData);
-                            } else {
-                                var sendData = {
-                                    userData: userData,
-                                    fileName: req.body.fileName,
-                                    fileType: req.body.fileType
-                                }
-                                bookApiController.GETUPLOADURL(sendData, function (respData) {
-                                    res.status(respData.ReturnCode).send(respData);
-                                });
-                            }
+        app.post('/upload-file', upload.single('file'), async (req, res) => {
+            try {
+                // Check for authorization header
+                const errors = validationResult(req);
+                if (!req.headers.authorization) {
+                    return res.status(401).json({
+                        ReturnCode: 401,
+                        err: 1,
+                        ReturnMsg: 'Authorization header is required'
+                    });
+                }
+
+                // Decode the token to verify the user
+                apiJwtController.DECODE(req, async function (userData) {
+                    if (userData.ReturnCode !== 200) {
+                        return res.status(userData.ReturnCode).json(userData);
+                    }
+
+                    // Proceed with file upload if user is authenticated
+                    if (!req.file) {
+                        return res.status(400).json({
+                            ReturnCode: 400,
+                            err: 1,
+                            ReturnMsg: 'No file uploaded.'
                         });
                     }
-                } catch (err) {
-                    var respData = commonController.errorValidationResponse(err);
-                    res.status(respData.ReturnCode).send(respData);
-                }
-            });
+
+                    // Extract file data from the request
+                    const file = req.file;
+                    const fileName = `book-covers/${Date.now()}-${file.originalname}`;
+                    const fileContent = file.buffer;
+
+                    // S3 upload parameters
+                    const params = {
+                        Bucket: process.env.AWS_S3_BUCKET,
+                        Key: fileName,
+                        Body: fileContent,
+                        ContentType: file.mimetype,
+                        ACL: 'public-read'
+                    };
+
+                    // Upload the file to S3
+                    const uploadResult = await s3.upload(params).promise();
+
+                    // Ensure the upload result contains a Location
+                    if (!uploadResult.Location) {
+                        return res.status(500).json({
+                            ReturnCode: 500,
+                            err: 1,
+                            ReturnMsg: 'Failed to retrieve file URL from S3'
+                        });
+                    }
+
+                    // Return the uploaded file URL
+                    res.status(200).json({
+                        ReturnCode: 200,
+                        err: 0,
+                        Data: {
+                            fileUrl: uploadResult.Location
+                        },
+                        ReturnMsg: 'File uploaded successfully'
+                    });
+                });
+            } catch (error) {
+                console.error('Error uploading file:', error);
+                res.status(500).json({
+                    ReturnCode: 500,
+                    err: 1,
+                    ReturnMsg: 'Failed to upload file'
+                });
+            }
+        });
     },
 
 }

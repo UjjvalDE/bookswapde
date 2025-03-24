@@ -5,6 +5,11 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+  <!-- Inject the API key into a global variable -->
+  <script>
+    window.VERIFY_EMAIL_API_KEY = '<%= process.env.VERIFY_EMAIL_API_KEY %>';
+  </script>
+
   <div class="signup-page">
     <div class="signup-header">
       <h1>BookSwap</h1>
@@ -28,6 +33,8 @@
               <div class="form-group">
                 <label for="email">Email Address</label>
                 <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                <div id="emailError" class="error-message" style="display: none;">Please enter a valid email address.
+                </div>
               </div>
               <div class="form-group">
                 <label for="password">Password</label>
@@ -41,6 +48,8 @@
                   </select>
                   <input type="tel" id="number" name="number" placeholder="Enter phone number" required>
                 </div>
+                <div id="phoneError" class="error-message" style="display: none;">Please enter a valid phone number for
+                  the selected country.</div>
               </div>
             </div>
 
@@ -126,6 +135,7 @@
   </div>
 
   <style>
+    /* Existing styles remain unchanged */
     .signup-page {
       min-height: 100vh;
       background: linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%);

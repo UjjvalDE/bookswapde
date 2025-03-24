@@ -1,15 +1,14 @@
 const bookModal = require('../models/Book');
 const userModel = require('../models/user')
-
-// Configure AWS S3
-const s3 = new AWS.S3({
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID, // Set in your environment variables
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY, // Set in your environment variables
-    region: process.env.AWS_REGION // e.g., 'us-east-1'
-});
+const loginTokenModal = require('../models/login_token/login_token');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const book = require('../setting/book');
+const url = process.env.BASE_URL
 
 module.exports = {
     ADDBOOK: async function (data, callback) {
+        //send data
         var sendData = {
             ReturnCode: 200,
             err: 0,
@@ -17,6 +16,7 @@ module.exports = {
             ReturnMsg: ""
         };
 
+        //condition
         const condition = {
             bookName: data.bookName,
             addedBy: data.userData.Data._id
@@ -31,24 +31,26 @@ module.exports = {
                 price: data.price,
                 bookType: data.bookType,
                 addedBy: data.userData.Data._id
-            };
+            }
             var respData = await bookModal.create(bookdetail);
             if (respData) {
                 sendData['ReturnCode'] = 200;
                 sendData['Data'] = respData;
-                callback(sendData);
+                callback(sendData)
             }
+
         } else {
             console.log('already');
+
             sendData['ReturnCode'] = 201;
             sendData['err'] = 1;
             sendData['Data'] = bookData;
             sendData['ReturnMsg'] = "This book already Added";
-            callback(sendData);
+            callback(sendData)
         }
     },
-
     MYBOOK: async function (data, callback) {
+        //send data
         var sendData = {
             ReturnCode: 200,
             err: 0,
@@ -56,6 +58,7 @@ module.exports = {
             ReturnMsg: ""
         };
 
+        //condition
         const condition = {
             addedBy: data.Data._id
         };
@@ -64,16 +67,16 @@ module.exports = {
         if (bookData.length > 0) {
             sendData['ReturnCode'] = 200;
             sendData['Data'] = bookData;
-            callback(sendData);
+            callback(sendData)
         } else {
             sendData['ReturnCode'] = 201;
             sendData['err'] = 1;
             sendData['ReturnMsg'] = "No book you added yet";
-            callback(sendData);
+            callback(sendData)
         }
     },
-
     DETAIL: async function (data, callback) {
+        //send data
         var sendData = {
             ReturnCode: 200,
             err: 0,
@@ -81,19 +84,25 @@ module.exports = {
             ReturnMsg: ""
         };
 
-        const user_id = data.userData.Data._id;
-        const book_id = data.bookId.replace(/[^a-fA-F0-9]/g, "");
+
+
+        //condition
+        const user_id = (data.userData.Data._id)
+        const book_id = (data.bookId.replace(/[^a-fA-F0-9]/g, ""));
+
 
         const condition = {
             _id: book_id
         };
-        const bookData = await bookModal.find(condition);
+        const bookData = await bookModal.find(condition)
         if (bookData.length > 0) {
-            const sellerData = await userModel.findOne({ _id: bookData[0].addedBy });
+
+            const sellerData = await userModel.findOne({ _id: bookData[0].addedBy })
+
 
             if (sellerData) {
-                bookData[0].userName = sellerData.name;
-                var admin = ObjectId(user_id).equals(bookData[0].addedBy) ? true : false;
+                bookData[0].userName = sellerData.name
+                var admin = ObjectId(user_id).equals(bookData[0].addedBy) ? true : false
                 if (admin == true) {
                     returnData = {
                         bookName: bookData[0].bookName,
@@ -104,12 +113,12 @@ module.exports = {
                         admin: admin,
                         bookType: bookData[0].bookType,
                         sellerData: sellerData
-                    };
+                    }
                     sendData['ReturnCode'] = 200;
                     sendData['Data'] = returnData;
-                    callback(sendData);
+                    callback(sendData)
                 } else {
-                    const userData = await userModel.findOne({ _id: user_id });
+                    const userData = await userModel.findOne({ _id: user_id })
                     returnData = {
                         bookName: bookData[0].bookName,
                         coverImage: bookData[0].coverImage,
@@ -120,21 +129,22 @@ module.exports = {
                         bookType: bookData[0].bookType,
                         sellerData: sellerData,
                         userData: userData
-                    };
+                    }
                     sendData['ReturnCode'] = 200;
                     sendData['Data'] = returnData;
-                    callback(sendData);
+                    callback(sendData)
                 }
+
             }
         } else {
             sendData['ReturnCode'] = 201;
             sendData['err'] = 1;
             sendData['ReturnMsg'] = "No book found";
-            callback(sendData);
+            callback(sendData)
         }
     },
-
     UPDATE: async function (data, callback) {
+        //send data
         var sendData = {
             ReturnCode: 200,
             err: 0,
@@ -142,8 +152,11 @@ module.exports = {
             ReturnMsg: ""
         };
 
-        const user_id = data.userData.Data._id;
-        const book_id = data.bookId.replace(/[^a-fA-F0-9]/g, "");
+
+
+        //condition
+        const user_id = (data.userData.Data._id)
+        const book_id = (data.bookId.replace(/[^a-fA-F0-9]/g, ""));
         const bookData = data.bookData;
         const { myBookName, coverImage, description, myBookType, price } = bookData;
 
@@ -156,21 +169,22 @@ module.exports = {
             description: description,
             price: price,
             bookType: myBookType
-        };
-        const updateBook = await bookModal.update(condition, updateData);
+        }
+        const updateBook = await bookModal.update(condition, updateData)
         if (updateBook.length > 0) {
+
             sendData['ReturnCode'] = 200;
             sendData['Data'] = updateBook;
             sendData['ReturnMsg'] = "Update bookData done";
-            callback(sendData);
+            callback(sendData)
+
         } else {
             sendData['ReturnCode'] = 201;
             sendData['err'] = 1;
             sendData['ReturnMsg'] = "No book found";
-            callback(sendData);
+            callback(sendData)
         }
     },
-
     DELETE: async function (data, callback) {
         var sendData = {
             ReturnCode: 200,
@@ -179,26 +193,28 @@ module.exports = {
             ReturnMsg: ""
         };
 
-        const user_id = data.userData.Data._id;
-        const book_id = data.bookId.replace(/[^a-fA-F0-9]/g, "");
+        const user_id = (data.userData.Data._id)
+        const book_id = (data.bookId.replace(/[^a-fA-F0-9]/g, ""));
 
         const condition = {
             _id: book_id
         };
 
-        const deleteBook = await bookModal.remove(condition);
+        const deleteBook = await bookModal.remove(condition)
         if (deleteBook.length > 0) {
+
             sendData['ReturnCode'] = 200;
             sendData['ReturnMsg'] = "Delete Book from this platform";
-            callback(sendData);
+            callback(sendData)
+
         } else {
             sendData['ReturnCode'] = 201;
             sendData['err'] = 1;
             sendData['ReturnMsg'] = "No book found";
-            callback(sendData);
+            callback(sendData)
         }
-    },
 
+    },
     ALLBOOK: async function (data, callback) {
         var sendData = {
             ReturnCode: 200,
@@ -210,11 +226,13 @@ module.exports = {
         try {
             const { search, type, price } = data.search || {};
 
+            // Base query for available books where addedBy is not the current user
             let query = {
                 available: true,
-                addedBy: { $ne: data.userData && data.userData.Data ? data.userData.Data._id : null }
+                addedBy: { $ne: data.userData && data.userData.Data ? data.userData.Data._id : null } // Only show books not added by current user
             };
 
+            // Build search query
             if (search) {
                 query.$or = [
                     { bookName: { $regex: search, $options: 'i' } },
@@ -222,23 +240,15 @@ module.exports = {
                 ];
             }
 
+            // Apply filters
             if (type) query.bookType = type;
             if (price) {
                 try {
-                    if (price.endsWith('+')) {
-                        const min = parseFloat(price.slice(0, -1));
-                        if (!isNaN(min)) {
-                            query.price = { $gte: min };
-                        }
-                    } else if (price === '0-0') {
-                        query.price = { $eq: 0 };
-                    } else {
-                        const [min, max] = price.split('-').map(p => parseFloat(p));
-                        if (!isNaN(min)) {
-                            query.price = { $gte: min };
-                            if (!isNaN(max)) {
-                                query.price.$lte = max;
-                            }
+                    const [min, max] = price.split('-').map(p => parseFloat(p));
+                    if (!isNaN(min)) {
+                        query.price = { $gte: min };
+                        if (!isNaN(max)) {
+                            query.price.$lte = max;
                         }
                     }
                 } catch (error) {
@@ -246,11 +256,13 @@ module.exports = {
                 }
             }
 
+            // Fetch books with populated seller data
             let bookData = await bookModal.find(query)
                 .populate('addedBy', 'name email')
                 .lean()
                 .exec();
 
+            // If user is authenticated and has interests, sort by interests
             if (data.userData && data.userData.interestedBooks && data.userData.interestedBooks.length > 0) {
                 const userInterests = data.userData.interestedBooks
                     .filter(book => typeof book === 'string')
@@ -263,26 +275,31 @@ module.exports = {
                     return acc;
                 }, [[], []]);
 
+                // Randomize non-matching books if no filters are applied
                 if (!search && !type && !price) {
                     others.sort(() => Math.random() - 0.5);
                 }
 
                 bookData = [...matches, ...others];
             } else if (!search && !type && !price) {
+                // Randomize all books if no filters and no interests
                 bookData.sort(() => Math.random() - 0.5);
             }
 
+            // Handle results
             if (bookData.length > 0) {
+                // Format book data
                 const formattedBooks = bookData.map(book => ({
                     ...book,
                     sellerName: book.addedBy && book.addedBy.name ? book.addedBy.name : 'Unknown Seller',
                     sellerEmail: book.addedBy ? book.addedBy.email : null,
-                    addedBy: book.addedBy ? book.addedBy._id : null
+                    addedBy: book.addedBy ? book.addedBy._id : null // Keep only the ID in addedBy field
                 }));
 
                 sendData.Data = formattedBooks;
                 sendData.ReturnMsg = "Books fetched successfully";
             } else {
+                // No books found, get suggestions
                 try {
                     const suggestions = await bookModal.aggregate([
                         {
@@ -329,6 +346,7 @@ module.exports = {
             }
 
             return callback(sendData);
+
         } catch (error) {
             console.error("ALLBOOK Error:", error);
             sendData.ReturnCode = 500;
@@ -337,7 +355,6 @@ module.exports = {
             return callback(sendData);
         }
     },
-
     TOGGLEAVAILABILITY: async function (data, callback) {
         var sendData = {
             ReturnCode: 200,
@@ -351,6 +368,7 @@ module.exports = {
             const book_id = data.bookId.replace(/[^a-fA-F0-9]/g, "");
             const newAvailability = data.available;
 
+            // Find the book
             const book = await bookModal.findOne({ _id: book_id });
 
             if (!book) {
@@ -360,6 +378,7 @@ module.exports = {
                 return callback(sendData);
             }
 
+            // Check if user is the owner
             if (!book.addedBy.equals(user_id)) {
                 sendData.ReturnCode = 403;
                 sendData.err = 1;
@@ -367,12 +386,14 @@ module.exports = {
                 return callback(sendData);
             }
 
+            // Update availability
             book.available = newAvailability;
             await book.save();
 
             sendData.Data = book;
             sendData.ReturnMsg = `Book marked as ${newAvailability ? 'available' : 'unavailable'}`;
             callback(sendData);
+
         } catch (err) {
             console.error("Toggle availability error:", err);
             sendData.ReturnCode = 500;
@@ -381,52 +402,4 @@ module.exports = {
             callback(sendData);
         }
     },
-    GETUPLOADURL: async function (data, callback) {
-        var sendData = {
-            ReturnCode: 200,
-            err: 0,
-            Data: {},
-            ReturnMsg: ""
-        };
-
-        try {
-            const { fileName, fileType } = data;
-
-            if (!fileName || !fileType) {
-                sendData.ReturnCode = 400;
-                sendData.err = 1;
-                sendData.ReturnMsg = "File name and type are required";
-                return callback(sendData);
-            }
-
-            const uniqueFileName = `${Date.now()}-${fileName}`;
-            const bucketName = process.env.AWS_S3_BUCKET_NAME;
-
-            const params = {
-                Bucket: bucketName,
-                Key: `book-covers/${uniqueFileName}`,
-                Expires: 60,
-                ContentType: fileType, // Ensure this matches the file.type sent from the frontend
-                ACL: 'public-read'
-            };
-
-            console.log('Generating presigned URL with params:', params); // Debug log
-
-            const uploadUrl = await s3.getSignedUrlPromise('putObject', params);
-            const fileUrl = `https://${bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/book-covers/${uniqueFileName}`;
-
-            sendData.Data = {
-                uploadUrl,
-                fileUrl
-            };
-            sendData.ReturnMsg = "Upload URL generated successfully";
-            callback(sendData);
-        } catch (error) {
-            console.error("GETUPLOADURL Error:", error);
-            sendData.ReturnCode = 500;
-            sendData.err = 1;
-            sendData.ReturnMsg = "Error generating upload URL";
-            callback(sendData);
-        }
-    }
-};
+}
