@@ -2,12 +2,12 @@
 const cartoonUrls = {
   cat: 'https://bookswapde.s3.eu-north-1.amazonaws.com/cat.jpeg',
   dog: 'https://bookswapde.s3.eu-north-1.amazonaws.com/dog.png',
-  rabbit: 'https://bookswapde.s3.eu-north-1.amazonaws.com/rabbit.png',
+  rabbit: 'https://bookswapde-783764604408.s3-accesspoint.eu-north-1.amazonaws.com/rabbit.png',
   dear: 'https://bookswapde.s3.eu-north-1.amazonaws.com/dear.png',
   skybird: 'https://bookswapde.s3.eu-north-1.amazonaws.com/cat.jpeg',
-  seeAnimal: 'https://bookswapde.s3.eu-north-1.amazonaws.com/seaanimal.png',
+  seeAnimal: 'https://bookswapde-783764604408.s3-accesspoint.eu-north-1.amazonaws.com/seaanimal.png',
   pug: 'https://bookswapde.s3.eu-north-1.amazonaws.com/smalldog.png',
-  lion: 'https://bookswapde.s3.eu-north-1.amazonaws.com/lion.png'
+  lion: 'https://bookswapde-783764604408.s3-accesspoint.eu-north-1.amazonaws.com/lion.png'
 };
 
 // Add styles for avatar selection
