@@ -215,7 +215,6 @@ module.exports = {
                                 _id: userVerifyData._id,
                                 name: userVerifyData.name,
                                 email: userVerifyData.email,
-                                organization,
                                 email_verify: userVerifyData.email_verify,
                                 profile_img: userVerifyData.profile_img,
 
@@ -234,7 +233,7 @@ module.exports = {
                         }
                         const token = await loginTokenModal.create(tokenCreate);
                         console.log(token);
-
+                        sendData['err'] = 0;
                         sendData['Data'].token = token;
                         callback(sendData);
 
